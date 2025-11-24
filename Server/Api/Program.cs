@@ -13,10 +13,20 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
     conf.UseNpgsql(appOptions.DBConnectionString);
 });
 
+builder.Services.AddControllers();
+builder.Services.AddOpenApiDocument(config =>
+{
+    config.Title = "Dead Pidgeons API";
+    config.Version = "v0.1";
+});
+
 var app = builder.Build();
 
 app.UseCors(config => config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-app.MapGet("/", () => "Hello World!");
+app.MapControllers();
+
+app.UseOpenApi();
+app.UseSwaggerUi();
 
 app.Run();
