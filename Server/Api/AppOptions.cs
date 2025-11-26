@@ -1,6 +1,10 @@
-﻿namespace Api;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api;
 
 public class AppOptions
 {
-    public string DBConnectionString { get; set; }
+    [Required]
+    [Length(1, 1000)]
+    public string DBConnectionString { get; set; } = string.Empty;
 }
