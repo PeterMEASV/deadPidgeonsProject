@@ -1,4 +1,5 @@
 using api;
+using Api.Security;
 using Api.Services.Classes;
 using Api.Services.Interfaces;
 using DataAccess;
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
     conf.UseNpgsql(appOptions.DBConnectionString);
 });
 
+builder.Services.AddScoped<KonciousArgon2idPasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();

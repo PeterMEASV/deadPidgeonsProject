@@ -1,27 +1,19 @@
 ﻿
 using Api.Models;
+using Api.Security;
 using Api.Services.Interfaces;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services.Classes;
 
-public class UserService : IUserService
+public class UserService(MyDbContext context, ILogger<UserService> logger, KonciousArgon2idPasswordHasher passwordHasher) : IUserService
 {
-    private readonly MyDbContext _context;
-    private readonly ILogger<UserService> _logger;
-
-    public UserService(MyDbContext context, ILogger<UserService> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-
     public async Task<List<User>> GetAllUsersAsync()
     {
-        _logger.LogInformation("Getting all users");
+        logger.LogInformation("Getting all users");
 
-        return await _context.Users
+        return await context.Users
             .OrderBy(u => u.Lastname)
             .ThenBy(u => u.Firstname)
             .ToListAsync();
@@ -29,14 +21,14 @@ public class UserService : IUserService
 
     public async Task<User?> GetUserByIdAsync(string id)
     {
-        _logger.LogInformation("Getting user by id");
+        logger.LogInformation("Getting user by id");
 
-        return await _context.Users.FindAsync(id);
+        return await context.Users.FindAsync(id);
     }
 
     public async Task<User> CreateUserAsync(CreateUserDTO userDto)
     {
-        _logger.LogInformation("Creating user {Email}", userDto.email);
+        logger.LogInformation("Creating user {Email}", userDto.email);
 
         //Validator
         if (string.IsNullOrWhiteSpace(userDto.firstname) ||
@@ -47,7 +39,7 @@ public class UserService : IUserService
             throw new ArgumentException("Fill out all fields");
         }
 
-        var existingUser = await _context.Users
+        var existingUser = await context.Users
             .FirstOrDefaultAsync(u => u.Email == userDto.email);
 
         if (existingUser != null)
@@ -62,24 +54,24 @@ public class UserService : IUserService
             Lastname = userDto.lastname,
             Email = userDto.email,
             Phonenumber = userDto.phonenumber,
-            Password = userDto.password, // TODO: Hash password
+            Password = passwordHasher.HashPassword(null, userDto.password),
             Balance = 0,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow.ToLocalTime()
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation("Created user {UserId} - {Email}", user.Id, user.Email);
+        logger.LogInformation("Created user {UserId} - {Email}", user.Id, user.Email);
 
         return user;
     }
 
     public async Task<User> UpdateUserAsync(string id, UpdateUserDTO updateDto)
     {
-        _logger.LogInformation("Updating user {UserId}", id);
+        logger.LogInformation("Updating user {UserId}", id);
 
-        var user = await _context.Users.FindAsync(id);
+        var user = await context.Users.FindAsync(id);
 
         if (user == null)
         {
@@ -98,7 +90,7 @@ public class UserService : IUserService
         // Check if email is already an existing email
         if (user.Email != updateDto.email)
         {
-            var existingUser = await _context.Users
+            var existingUser = await context.Users
                 .FirstOrDefaultAsync(u => u.Email == updateDto.email);
 
             if (existingUser != null)
@@ -117,18 +109,18 @@ public class UserService : IUserService
             user.Password = updateDto.password; // TODO: Hash password
         }
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation("Updated user {UserId}", id);
+        logger.LogInformation("Updated user {UserId}", id);
 
         return user;
     }
 
     public async Task<bool> DeleteUserAsync(string id)
     {
-        _logger.LogInformation("Deleting user {UserId}", id);
+        logger.LogInformation("Deleting user {UserId}", id);
 
-        var user = await _context.Users
+        var user = await context.Users
             .Include(u => u.Boards)
             .Include(u => u.Balancelogs)
             .FirstOrDefaultAsync(u => u.Id == id);
@@ -153,19 +145,19 @@ public class UserService : IUserService
             throw new InvalidOperationException("Cannot delete user with transaction history.");
         }
 
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        context.Users.Remove(user);
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation("Deleted user {UserId} - {Email}", id, user.Email);
+        logger.LogInformation("Deleted user {UserId} - {Email}", id, user.Email);
 
         return true;
     }
 
     public async Task<object> GetUserDetailsAsync(string id)
     {
-        _logger.LogInformation("Getting user details for user {UserId}", id);
+        logger.LogInformation("Getting user details for user {UserId}", id);
         
-        var user = await _context.Users
+        var user = await context.Users
             .Include(u => u.Boards)
             .Include(u => u.Balancelogs)
             .FirstOrDefaultAsync(u => u.Id == id);
