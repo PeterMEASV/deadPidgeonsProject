@@ -17,7 +17,7 @@ function AdminPage() {
                         <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/game')}>
                             Nuværende Spil
                         </button>
-                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/users')}>
+                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/users/search')}>
                             Brugere
                         </button>
                         <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/transactions')}>
