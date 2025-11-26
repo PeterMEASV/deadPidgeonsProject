@@ -1,4 +1,6 @@
 using api;
+using Api.Services.Classes;
+using Api.Services.Interfaces;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,8 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
 {
     conf.UseNpgsql(appOptions.DBConnectionString);
 });
+
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument(config =>
