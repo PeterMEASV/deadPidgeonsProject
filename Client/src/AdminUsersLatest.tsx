@@ -1,8 +1,17 @@
 import {useNavigate} from "react-router";
+import {useEffect, useState} from "react";
+import {userClient} from "./baseUrl.ts";
+import type {User} from "./generated-ts-client.ts";
 
 function AdminUsersLatest() {
     const navigate = useNavigate();
+    const [users, setUsers] = useState<User[]>([]);
 
+    useEffect(() => {
+        userClient.getAllUsers().then(r => {
+            setUsers(r);
+        })
+    }, [])
 
     return (
         <>
@@ -13,7 +22,6 @@ function AdminUsersLatest() {
 
             <div className="overflow-x-auto ">
                 <table className="table">
-                    {/* head */}
                     <thead>
                     <tr className="text-center bg-base-200">
                         <th>Name</th>
@@ -22,42 +30,15 @@ function AdminUsersLatest() {
                     </tr>
                     </thead>
                     <tbody>
-                    <tr className="hover:bg-base-300 cursor-pointer text-center">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
-                    <tr className="hover:bg-base-300 cursor-pointer text-center bg-base-200">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
-                    <tr className="hover:bg-base-300 cursor-pointer text-center">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
-                    <tr className="hover:bg-base-300 cursor-pointer text-center bg-base-200">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
-                    <tr className="hover:bg-base-300 cursor-pointer text-center">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
-                    <tr className="hover:bg-base-300 cursor-pointer text-center bg-base-200">
-                        <td>Cy Ganderton</td>
-                        <td>+4512345678</td>
-                        <td>BananaMaster@gmail.com</td>
-                    </tr>
-
+                    {users.map((user, index) => (
+                        <tr 
+                            key={user.id} 
+                            className={`hover:bg-base-300 cursor-pointer text-center ${index % 2 !== 0 ? 'bg-base-200' : ''}`}>
+                            <td>{user.firstname} {user.lastname}</td>
+                            <td>{user.phonenumber}</td>
+                            <td>{user.email}</td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </div>
