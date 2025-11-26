@@ -1,6 +1,6 @@
 import {Outlet, useNavigate} from 'react-router';
 
-function Topbar() {
+function AdminPage() {
     const navigate = useNavigate()
 
     return (
@@ -21,7 +21,7 @@ function Topbar() {
                     </div>
                 </div>
                 <div className="navbar-center">
-                    <a className="btn btn-ghost text-xl" onClick={() => navigate('/')}>daisyUI</a>
+                    <a className="btn btn-ghost text-xl" onClick={() => navigate('/')}>Admin Page</a>
                 </div>
                 <div className="navbar-end">
                     <button className="btn btn-ghost btn-circle">
@@ -42,4 +42,4 @@ function Topbar() {
     );
 }
 
-export default Topbar;
+export default AdminPage;

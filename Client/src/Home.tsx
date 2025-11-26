@@ -5,8 +5,9 @@ function Home() {
 
     return (
         <>
-            <h1>Home</h1>
-            <button onClick={() => navigate("/template")}>Go to Template</button>
+            <h1>Navigate to:</h1>
+            <button onClick={() => navigate("/Admin")}>Admin Page</button>
+            <button onClick={() => navigate("/Player")}>Player Page</button>
         </>
     )
 }
