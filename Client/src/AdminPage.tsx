@@ -8,22 +8,22 @@ function AdminPage() {
         <>
             <div className="navbar bg-[#F44336] shadow-sm" >
                 <div className="navbar-start">
-                    <div className="cursor-pointer" onClick={() => navigate('/Admin')}>
+                    <div className="cursor-pointer" onClick={() => navigate('/admin')}>
                         <img src={logo} alt="Jerne IF" className="h-24" />
                     </div>
                 </div>
                 <div className="flex-1">
                     <div className="flex justify-between w-full gap-20 px-8">
-                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/button1')}>
+                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/game')}>
                             Nuværende Spil
                         </button>
-                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/button2')}>
+                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/users')}>
                             Brugere
                         </button>
-                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/button3')}>
+                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/transactions')}>
                             Transaktioner
                         </button>
-                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/button4')}>
+                        <button className="border-2 border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-[#F44336] transition-colors whitespace-nowrap" onClick={() => navigate('/admin/history')}>
                             Historik
                         </button>
                     </div>
