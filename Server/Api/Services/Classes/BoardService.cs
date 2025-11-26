@@ -1,0 +1,169 @@
+﻿using Api.Models;
+using Api.Services.Interfaces;
+using DataAccess;
+using Microsoft.EntityFrameworkCore;
+
+namespace Api.Services.Classes;
+
+public class BoardService(MyDbContext context, ILogger<BoardService> logger) : IBoardService
+{
+    public decimal CalculateBoardPrice(int numberOfFields)
+    {
+        return numberOfFields switch
+        {
+            5 => 20m,
+            6 => 40m,
+            7 => 80m,
+            8 => 160m,
+            _ => throw new ArgumentException("Please select atleast 5 Numbers")
+        };
+    }
+    
+    private bool ValidateBoard(List<int>? selectedNumbers, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+        
+        if (selectedNumbers == null || selectedNumbers.Count < 5 || selectedNumbers.Count > 8)
+        {
+            errorMessage = "Please select atleast 5 Numbers and Max 8 Numbers";
+            return false;
+        }
+
+        if (selectedNumbers.Any(n => n < 1 || n > 16))
+        {
+            errorMessage = "Numbers must be between 1 and 16";
+            return false;
+        }
+
+        if (selectedNumbers.Distinct().Count() != selectedNumbers.Count)
+        {
+            errorMessage = "You cant select the same number twice";
+            return false;
+        }
+        
+        return true;
+    }
+
+    public async Task<Board> CreateBoardAsync(CreateBoardDTO dto)
+    {
+        logger.LogInformation("Creating board for user {UserId}", dto.UserId);
+        
+        if (!ValidateBoard(dto.SelectedNumbers, out string validationError))
+        {
+            throw new ArgumentException(validationError);
+        }
+
+        var user = await context.Users.FindAsync(dto.UserId);
+        if (user == null)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+        
+        // MATH!!
+        decimal boardPrice = CalculateBoardPrice(dto.SelectedNumbers.Count);
+        decimal totalPrice = boardPrice * dto.RepeatForWeeks;
+
+        if (user.Balance < totalPrice)
+        {
+            throw new InvalidOperationException("Insufficient funds.");
+        }
+
+        var createdBoards = new List<Board>();
+        for (int i = 0; i < dto.RepeatForWeeks; i++)
+        {
+            var board = new Board
+            {
+                Id = Guid.NewGuid().ToString(),
+                Userid = dto.UserId,
+                Selectednumbers = new List<int>(dto.SelectedNumbers),
+                Timestamp = DateTime.Now,
+                Winner = false
+            };
+            
+            context.Boards.Add(board);
+            createdBoards.Add(board);
+        }
+
+        user.Balance -= totalPrice;
+
+        await context.SaveChangesAsync();
+        
+        logger.LogInformation("Created {Count} boards for user {UserId}. Total was {Total} DKK",
+            dto.RepeatForWeeks, dto.UserId, totalPrice);
+
+        return createdBoards.First();
+    }
+
+    public async Task<List<Board>> GetBoardsByUserAsync(string userId)
+    {
+        logger.LogInformation("Getting boards for user {UserId}", userId);
+
+        return await context.Boards
+            .Where(b => b.Userid == userId)
+            .OrderByDescending(b => b.Timestamp)
+            .ToListAsync();
+    }
+
+    public async Task<List<Board>> GetAllBoardsAsync()
+    {
+        logger.LogInformation("Getting all boards");
+
+        return await context.Boards
+            .Include(b => b.User)
+            .OrderByDescending(b => b.Timestamp)
+            .ToListAsync();
+    }
+
+    public async Task<Board?> GetBoardByIdAsync(string boardId)
+    {
+        logger.LogInformation("Getting board by id {BoardId}", boardId);
+        
+        return await context.Boards.FindAsync(boardId);
+    }
+
+    public async Task<bool> DeleteBoardAsync(string boardId)
+    {
+        logger.LogInformation("Deleting board {BoardId}", boardId);
+        
+        var board = await context.Boards.FindAsync(boardId);
+        if (board == null)
+        {
+            throw new KeyNotFoundException("Board not found");
+        }
+
+        var user = await context.Users.FindAsync(board.Userid);
+        if (user == null)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+        
+        // Refund
+        decimal refundAmount = CalculateBoardPrice(board.Selectednumbers.Count);
+        user.Balance += refundAmount;
+
+        context.Boards.Remove(board);
+        await context.SaveChangesAsync();
+        
+        logger.LogInformation("Deleted board {BoardId} and refunded {Amount} DKK", boardId, refundAmount);
+        
+        return true;
+    }
+
+    public Task<object> ValidateBoardAsync(List<int>? selectedNumbers)
+    {
+        logger.LogInformation("Validating board with {Count} numbers", selectedNumbers?.Count ?? 0);
+
+        if (!ValidateBoard(selectedNumbers, out string errorMessage))
+        {
+            return Task.FromResult<object>(new { isValid = false, errorMessage });
+        }
+
+        decimal price = CalculateBoardPrice(selectedNumbers!.Count);
+        return Task.FromResult<object>(new
+        {
+            isValid = true, 
+            Price = price, 
+            NumberOfFields = selectedNumbers.Count
+        });
+    }
+}

@@ -11,6 +11,8 @@ builder.Services.AddCors();
 
 var appOptions = builder.Services.AddAppOptions(builder.Configuration);
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddDbContext<MyDbContext>(conf =>
 {
     conf.UseNpgsql(appOptions.DBConnectionString);
@@ -18,6 +20,7 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
 
 builder.Services.AddScoped<KonciousArgon2idPasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument(config =>
