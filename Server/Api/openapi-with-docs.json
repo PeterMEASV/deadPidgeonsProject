@@ -38,6 +38,80 @@
         }
       }
     },
+    "/api/Balance/approve": {
+      "post": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_ApproveTransaction",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveTransactionDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Balance/pending": {
+      "get": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_GetPendingTransactions",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Balance/approved": {
+      "get": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_GetApprovedTransactions",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Balance/transactions": {
       "get": {
         "tags": [
@@ -51,9 +125,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
-                  }
+                  "items": {}
                 }
               }
             }
@@ -85,9 +157,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
-                  }
+                  "items": {}
                 }
               }
             }
@@ -542,6 +612,16 @@
           }
         }
       },
+      "ApproveTransactionDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "transactionId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "BoardResponseDTO": {
         "type": "object",
         "additionalProperties": false,
@@ -670,6 +750,9 @@
           "timestamp": {
             "type": "string",
             "format": "date-time"
+          },
+          "approved": {
+            "type": "boolean"
           },
           "user": {
             "$ref": "#/components/schemas/User"

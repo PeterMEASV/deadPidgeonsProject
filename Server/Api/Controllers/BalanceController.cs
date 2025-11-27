@@ -4,21 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class BalanceController : ControllerBase
 {
     private readonly IBalanceService _balanceService;
     private readonly ILogger<BalanceController> _logger;
-    
+
     public BalanceController(IBalanceService balanceService, ILogger<BalanceController> logger)
     {
         _balanceService = balanceService;
         _logger = logger;
     }
-
-
+    
     [HttpPost("deposit")]
     public async Task<ActionResult<BalanceTransactionResponseDTO>> SubmitDeposit([FromBody] SubmitDepositDTO dto)
     {
@@ -31,8 +29,9 @@ public class BalanceController : ControllerBase
                 transaction.Userid,
                 transaction.Amount,
                 transaction.Transactionnumber,
-                transaction.Timestamp);
-            
+                transaction.Timestamp
+            );
+
             return Ok(response);
         }
         catch (KeyNotFoundException ex)
@@ -50,43 +49,137 @@ public class BalanceController : ControllerBase
         }
     }
 
+   
+    [HttpPost("approve")]
+    public async Task<ActionResult<BalanceTransactionResponseDTO>> ApproveTransaction([FromBody] ApproveTransactionDTO dto)
+    {
+        try
+        {
+            var transaction = await _balanceService.ApproveTransactionAsync(dto.TransactionId);
+
+            var response = new BalanceTransactionResponseDTO(
+                transaction.Id,
+                transaction.Userid,
+                transaction.Amount,
+                transaction.Transactionnumber,
+                transaction.Timestamp
+            );
+
+            return Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error approving transaction");
+            return StatusCode(500, "An error occurred while approving the transaction");
+        }
+    }
+    
+    [HttpGet("pending")]
+    public async Task<ActionResult<List<object>>> GetPendingTransactions()
+    {
+        try
+        {
+            var transactions = await _balanceService.GetPendingTransactionsAsync();
+
+            var response = transactions.Select(t => new
+            {
+                t.Id,
+                t.Userid,
+                UserName = t.User.Firstname + " " + t.User.Lastname,
+                t.Amount,
+                t.Transactionnumber,
+                t.Timestamp,
+                Status = "Pending"
+            }).ToList();
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting pending transactions");
+            return StatusCode(500, "An error occurred while getting pending transactions");
+        }
+    }
+    
+    [HttpGet("approved")]
+    public async Task<ActionResult<List<object>>> GetApprovedTransactions()
+    {
+        try
+        {
+            var transactions = await _balanceService.GetApprovedTransactionsAsync();
+
+            var response = transactions.Select(t => new
+            {
+                t.Id,
+                t.Userid,
+                UserName = t.User.Firstname + " " + t.User.Lastname,
+                t.Amount,
+                t.Transactionnumber,
+                t.Timestamp,
+                Status = "Approved"
+            }).ToList();
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting approved transactions");
+            return StatusCode(500, "An error occurred while getting approved transactions");
+        }
+    }
+    
     [HttpGet("transactions")]
-    public async Task<ActionResult<List<BalanceTransactionResponseDTO>>> GetAllTransactions()
+    public async Task<ActionResult<List<object>>> GetAllTransactions()
     {
         try
         {
             var transactions = await _balanceService.GetAllTransactionsAsync();
 
-            var response = transactions.Select(t => new BalanceTransactionResponseDTO(
+            var response = transactions.Select(t => new
+            {
                 t.Id,
                 t.Userid,
+                UserName = t.User.Firstname + " " + t.User.Lastname,
                 t.Amount,
                 t.Transactionnumber,
-                t.Timestamp)).ToList();
+                t.Timestamp,
+                t.Approved,
+                Status = t.Approved ? "Approved" : "Pending"
+            }).ToList();
 
             return Ok(response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting all transactions");
-            return StatusCode(500, "An error occurred while getting all transactions");
+            return StatusCode(500, "An error occurred while getting transactions");
         }
     }
     
     [HttpGet("user/{userId}/transactions")]
-    public async Task<ActionResult<List<BalanceTransactionResponseDTO>>> GetUserTransactions(string userId)
+    public async Task<ActionResult<List<object>>> GetUserTransactions(string userId)
     {
         try
         {
             var transactions = await _balanceService.GetUserTransactionsAsync(userId);
 
-            var response = transactions.Select(t => new BalanceTransactionResponseDTO(
+            var response = transactions.Select(t => new
+            {
                 t.Id,
-                t.Userid,
                 t.Amount,
                 t.Transactionnumber,
-                t.Timestamp
-            )).ToList();
+                t.Timestamp,
+                t.Approved,
+                Status = t.Approved ? "Approved" : "Pending"
+            }).ToList();
 
             return Ok(response);
         }
@@ -96,7 +189,7 @@ public class BalanceController : ControllerBase
             return StatusCode(500, "An error occurred while getting transactions");
         }
     }
-
+    
     [HttpGet("user/{userId}")]
     public async Task<ActionResult<object>> GetUserBalance(string userId)
     {
@@ -112,7 +205,7 @@ public class BalanceController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user balance");
-            return StatusCode(500, "An error occurred while getting user balance");
+            return StatusCode(500, "An error occurred while getting balance");
         }
     }
 }

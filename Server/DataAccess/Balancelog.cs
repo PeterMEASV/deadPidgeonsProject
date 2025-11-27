@@ -15,5 +15,7 @@ public partial class Balancelog
 
     public DateTime Timestamp { get; set; }
 
+    public bool Approved { get; set; }
+
     public virtual User User { get; set; } = null!;
 }
