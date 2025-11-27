@@ -1,205 +1,87 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import {useNavigate} from "react-router";
 
-const API_BASE = "http://localhost:5099/api"; // change if needed
+const API_BASE = "http://localhost:5099/api"; // update if needed
+
+interface PlayerBoard {
+    id: string;
+    selectedNumbers: number[];
+    price: number;
+    createdAt: string;
+}
 
 export default function PlayerGame() {
-    const [toggledButtons, setToggledButtons] = useState<Set<number>>(new Set());
-    const [showConfirmation, setShowConfirmation] = useState(false);
-    const [price, setPrice] = useState<number | null>(null);
-    const [loadingPrice, setLoadingPrice] = useState(false);
-    const [submitState, setSubmitState] = useState<{ loading: boolean; error?: string; success?: string }>({
-        loading: false,
-    });
 
-    // --- Toggle tiles, max 8 allowed ---
-    const handleButtonClick = (index: number) => {
-        setToggledButtons(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(index)) {
-                newSet.delete(index);
-            } else {
-                if (newSet.size >= 8) return newSet; // enforce max 8
-                newSet.add(index);
-            }
-            return newSet;
-        });
-    };
 
-    // --- Fetch price from backend whenever selected numbers change ---
+    const [boards, setBoards] = useState<PlayerBoard[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate()
+
     useEffect(() => {
-        const selectedNumbers = Array.from(toggledButtons).map(i => i + 1);
-
-        if (selectedNumbers.length < 5) {
-            setPrice(null);
-            setLoadingPrice(false);  // Ensure it's reset if <5
-            return;
-        }
-
-        setLoadingPrice(true);
-        const abortController = new AbortController();  // New: For cancelling the fetch
-
-        const t = setTimeout(() => {
-            fetch(`${API_BASE}/board/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(selectedNumbers),
-                credentials: "include",  // Ensure auth is included (as in your submit logic)
-                signal: abortController.signal  // New: Attach the abort signal
-            })
-                .then(async res => {
-                    if (!res.ok) throw new Error(await res.text());
-                    return res.json();
-                })
-                .then(data => {
-                    if (!data.isValid) {
-                        setPrice(null);
-                        return;
-                    }
-                    const p = data.price ?? data.Price;  // Handles backend's capital "Price"
-                    setPrice(p);
-                })
-                .catch(err => {
-                    if (err.name === 'AbortError') return;  // New: Ignore aborted fetches
-                    console.error(err);
-                    setPrice(null);
-                })
-                .finally(() => {
-                    setLoadingPrice(false);  // Always reset loading state
+        const fetchBoards = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/board/myboards`, {
+                    credentials: "include",
                 });
-        }, 150);
+                if (!res.ok) throw new Error(await res.text());
 
-        return () => {
-            abortController.abort();  // New: Abort the fetch on cleanup
-            clearTimeout(t);
+                const data = await res.json();
+                setBoards(data);
+            } catch (err: any) {
+                setError("kunne ikke finde igangværende spilleplader.");
+            } finally {
+                setLoading(false);
+            }
         };
-    }, [toggledButtons]);
 
-
-
-    // --- Show confirmation modal ---
-    const handleEndGame = () => {
-        setShowConfirmation(true);
-    };
-
-    // --- Submitting board to backend ---
-    const submitBoard = async () => {
-        const selectedNumbers = Array.from(toggledButtons).map(i => i + 1);
-
-        if (selectedNumbers.length < 5 || selectedNumbers.length > 8) {
-            setSubmitState({ loading: false, error: "You must pick between 5 and 8 numbers." });
-            return;
-        }
-
-        try {
-            const payload = {
-                selectedNumbers,
-                repeatForWeeks: 1
-            };
-
-            const res = await fetch(`${API_BASE}/board/create`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-                credentials: "include"
-            });
-
-            if (!res.ok) throw new Error(await res.text());
-
-            await res.json();
-
-            setSubmitState({ loading: false, success: "Board purchased successfully!" });
-            setToggledButtons(new Set());
-            setPrice(null);
-
-        } catch (err: any) {
-            setSubmitState({ loading: false, error: err.message || "Failed to submit board." });
-        }
-    };
-
-    // --- Confirm button inside modal ---
-    const handleConfirmSubmit = async () => {
-        setShowConfirmation(false);
-        setSubmitState({ loading: true });
-        await submitBoard();
-    };
-
-    // --- Cancels confirm modal ---
-    const handleCancel = () => setShowConfirmation(false);
-
-    const tileContent = (index: number) => {
-        if (toggledButtons.has(index)) {
-            return (
-                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-[#E50006FF] font-bold">
-                    {index + 1}
-                </div>
-            );
-        }
-        return index + 1;
-    };
-
-    const selectionCount = toggledButtons.size;
+        fetchBoards();
+    }, []);
 
     return (
-        <>
-            <div className="grid grid-cols-4 gap-4 w-full p-4">
-                {Array.from({ length: 16 }).map((_, index) => (
-                    <button
-                        key={index}
-                        className={`btn h-32 text-3xl flex items-center justify-center ${
-                            toggledButtons.has(index)
-                                ? "bg-[#E50006FF] text-white hover:bg-[#AF0006FF]"
-                                : "bg-[#F44336] text-white hover:bg-[#c93232]"
-                        }`}
-                        onClick={() => handleButtonClick(index)}
-                    >
-                        {tileContent(index)}
-                    </button>
-                ))}
-            </div>
+        <div className="p-6">
 
-            <div className="flex justify-center mt-6 mb-4">
+            {/* HEADER */}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">dine spil</h1>
+
                 <button
-                    className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]"
-                    disabled={selectionCount < 5 || selectionCount > 8}
-                    onClick={handleEndGame}
+                    className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3 text-lg"
+                    onClick={() => navigate("/Player/NewGame")}
                 >
-                    {loadingPrice
-                        ? "Checking price…"
-                        : price != null
-                            ? `${price} DKK`
-                            : "Select 5–8 fields"}
+                    køb ny spilleplade
                 </button>
             </div>
 
-            {submitState.error && (
-                <p className="text-center text-red-600 mb-4">{submitState.error}</p>
+            {/* LOADING / ERROR */}
+            {loading && <p>Loading...</p>}
+            {error && <p className="text-red-600">{error}</p>}
+
+            {/* BOARD LIST */}
+            {boards.length === 0 && !loading && (
+                <p className="text-gray-500 text-lg">du har ingen igangværende spilleplader</p>
             )}
-            {submitState.success && (
-                <p className="text-center text-green-600 mb-4">{submitState.success}</p>
-            )}
 
-            {/* CONFIRMATION MODAL */}
-            {showConfirmation && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                        <h2 className="text-xl font-bold mb-4">Confirm purchase</h2>
-                        <p>This board costs {price} DKK. Proceed?</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {boards.map(board => (
+                    <div key={board.id} className="p-4 bg-white rounded-lg shadow">
 
-                        <div className="flex justify-end gap-4 mt-4">
-                            <button className="btn btn-ghost px-6 py-3" onClick={handleCancel}>
-                                Cancel
-                            </button>
+                        <h2 className="text-xl font-semibold mb-2">Board #{board.id.slice(0, 8)}</h2>
 
-                            <button
-                                className="btn bg-[#E50006FF] text-white px-6 py-3 hover:bg-[#AF0006FF]"
-                                onClick={handleConfirmSubmit}
-                            >
-                                Confirm
-                            </button>
-                        </div>
+                        <p className="mb-1">
+                            <strong>Numbers:</strong> {board.selectedNumbers.join(", ")}
+                        </p>
+
+                        <p className="mb-1">
+                            <strong>Price:</strong> {board.price} DKK
+                        </p>
+
+                        <p className="text-sm text-gray-500">
+                            {new Date(board.createdAt).toLocaleString()}
+                        </p>
                     </div>
-                </div>
-            )}
-        </>
+                ))}
+            </div>
+        </div>
     );
 }
