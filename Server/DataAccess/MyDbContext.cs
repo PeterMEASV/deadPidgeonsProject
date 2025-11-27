@@ -29,6 +29,9 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Amount)
                 .HasPrecision(10, 2)
                 .HasColumnName("amount");
+            entity.Property(e => e.Approved)
+                .HasDefaultValue(false)
+                .HasColumnName("approved");
             entity.Property(e => e.Timestamp)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("timestamp");

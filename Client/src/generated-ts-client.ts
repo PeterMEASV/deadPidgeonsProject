@@ -54,7 +54,110 @@ export class BalanceClient {
         return Promise.resolve<BalanceTransactionResponseDTO>(null as any);
     }
 
-    getAllTransactions(): Promise<BalanceTransactionResponseDTO[]> {
+    approveTransaction(dto: ApproveTransactionDTO): Promise<BalanceTransactionResponseDTO> {
+        let url_ = this.baseUrl + "/api/Balance/approve";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApproveTransaction(_response);
+        });
+    }
+
+    protected processApproveTransaction(response: Response): Promise<BalanceTransactionResponseDTO> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BalanceTransactionResponseDTO;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BalanceTransactionResponseDTO>(null as any);
+    }
+
+    getPendingTransactions(): Promise<any[]> {
+        let url_ = this.baseUrl + "/api/Balance/pending";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetPendingTransactions(_response);
+        });
+    }
+
+    protected processGetPendingTransactions(response: Response): Promise<any[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as any[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any[]>(null as any);
+    }
+
+    getApprovedTransactions(): Promise<any[]> {
+        let url_ = this.baseUrl + "/api/Balance/approved";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetApprovedTransactions(_response);
+        });
+    }
+
+    protected processGetApprovedTransactions(response: Response): Promise<any[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as any[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any[]>(null as any);
+    }
+
+    getAllTransactions(): Promise<any[]> {
         let url_ = this.baseUrl + "/api/Balance/transactions";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -70,13 +173,13 @@ export class BalanceClient {
         });
     }
 
-    protected processGetAllTransactions(response: Response): Promise<BalanceTransactionResponseDTO[]> {
+    protected processGetAllTransactions(response: Response): Promise<any[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BalanceTransactionResponseDTO[];
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as any[];
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -84,10 +187,10 @@ export class BalanceClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<BalanceTransactionResponseDTO[]>(null as any);
+        return Promise.resolve<any[]>(null as any);
     }
 
-    getUserTransactions(userId: string): Promise<BalanceTransactionResponseDTO[]> {
+    getUserTransactions(userId: string): Promise<any[]> {
         let url_ = this.baseUrl + "/api/Balance/user/{userId}/transactions";
         if (userId === undefined || userId === null)
             throw new globalThis.Error("The parameter 'userId' must be defined.");
@@ -106,13 +209,13 @@ export class BalanceClient {
         });
     }
 
-    protected processGetUserTransactions(response: Response): Promise<BalanceTransactionResponseDTO[]> {
+    protected processGetUserTransactions(response: Response): Promise<any[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BalanceTransactionResponseDTO[];
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as any[];
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -120,7 +223,7 @@ export class BalanceClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<BalanceTransactionResponseDTO[]>(null as any);
+        return Promise.resolve<any[]>(null as any);
     }
 
     getUserBalance(userId: string): Promise<FileResponse> {
@@ -654,6 +757,10 @@ export interface SubmitDepositDTO {
     transactionNumber?: string;
 }
 
+export interface ApproveTransactionDTO {
+    transactionId?: number;
+}
+
 export interface BoardResponseDTO {
     id?: string;
     userId?: string;
@@ -692,6 +799,7 @@ export interface Balancelog {
     amount?: number;
     transactionnumber?: string;
     timestamp?: string;
+    approved?: boolean;
     user?: User;
 }
 
