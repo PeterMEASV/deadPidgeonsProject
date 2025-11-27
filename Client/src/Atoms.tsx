@@ -9,6 +9,8 @@ import AdminUsersSearch from "./AdminUsersSearch.tsx";
 import AdminTransactions from "./AdminTransactions.tsx";
 import AdminHistory from "./AdminHistory.tsx";
 import AdminUsersLatest from "./AdminUsersLatest.tsx";
+import PlayerTransactions from "./PlayerTransactions.tsx";
+import PlayerHistory from "./PlayerHistory.tsx";
 
 export const routesAtom = atom<RouteObject[]>([
     {
@@ -53,7 +55,16 @@ export const routesAtom = atom<RouteObject[]>([
             {
                 path: 'Game',
                 element: <PlayerGame />
+            },
+            {
+                path: 'Transactions',
+                element: <PlayerTransactions />
+            },
+            {
+                path: 'History',
+                element: <PlayerHistory />
             }
+            
         ]
     }
 ])
