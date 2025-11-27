@@ -546,6 +546,7 @@ export interface UpdateUserDTO {
     email?: string;
     phonenumber?: string;
     password?: string;
+    balance?: number;
 }
 
 export interface FileResponse {

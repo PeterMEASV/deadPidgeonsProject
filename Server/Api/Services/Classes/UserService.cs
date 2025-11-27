@@ -106,7 +106,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
 
         if (!string.IsNullOrWhiteSpace(updateDto.password))
         {
-            user.Password = updateDto.password; // TODO: Hash password
+            user.Password = passwordHasher.HashPassword(null, updateDto.password);
         }
 
         await context.SaveChangesAsync();

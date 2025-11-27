@@ -4,5 +4,5 @@ public record CreateUserDTO(string firstname, string lastname, string email, str
 
 public record DeleteUserDTO(string id);
 
-public record UpdateUserDTO(string firstname, string lastname, string email, string phonenumber, string password);
+public record UpdateUserDTO(string firstname, string lastname, string email, string phonenumber, string password, decimal balance);
 

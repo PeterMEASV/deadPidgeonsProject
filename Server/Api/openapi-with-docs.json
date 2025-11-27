@@ -583,6 +583,10 @@
           },
           "password": {
             "type": "string"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
           }
         }
       }
