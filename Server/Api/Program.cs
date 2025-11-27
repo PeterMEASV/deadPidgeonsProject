@@ -21,6 +21,7 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
 builder.Services.AddScoped<KonciousArgon2idPasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IBalanceService, BalanceService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument(config =>
