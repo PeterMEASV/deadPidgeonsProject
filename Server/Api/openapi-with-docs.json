@@ -6,6 +6,127 @@
     "version": "v0.1"
   },
   "paths": {
+    "/api/Balance/deposit": {
+      "post": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_SubmitDeposit",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitDepositDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Balance/transactions": {
+      "get": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_GetAllTransactions",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Balance/user/{userId}/transactions": {
+      "get": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_GetUserTransactions",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Balance/user/{userId}": {
+      "get": {
+        "tags": [
+          "Balance"
+        ],
+        "operationId": "Balance_GetUserBalance",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Board/create": {
       "post": {
         "tags": [
@@ -381,6 +502,46 @@
   },
   "components": {
     "schemas": {
+      "BalanceTransactionResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "transactionNumber": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SubmitDepositDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "transactionNumber": {
+            "type": "string"
+          }
+        }
+      },
       "BoardResponseDTO": {
         "type": "object",
         "additionalProperties": false,
