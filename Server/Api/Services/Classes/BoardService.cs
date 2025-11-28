@@ -53,6 +53,21 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger) : I
             throw new ArgumentException(validationError);
         }
 
+        // Get current active game
+        var currentGame = await context.Games
+            .FirstOrDefaultAsync(g => g.Isactive);
+
+        if (currentGame == null)
+        {
+            throw new InvalidOperationException("No active game available. Please contact administrator.");
+        }
+
+        // Check if winning numbers already drawn
+        if (currentGame.Winningnumbers != null && currentGame.Winningnumbers.Any())
+        {
+            throw new InvalidOperationException("Cannot purchase boards after winning numbers have been drawn.");
+        }
+        
         var user = await context.Users.FindAsync(dto.UserId);
         if (user == null)
         {
@@ -77,7 +92,8 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger) : I
                 Userid = dto.UserId,
                 Selectednumbers = new List<int>(dto.SelectedNumbers),
                 Timestamp = DateTime.Now,
-                Winner = false
+                Winner = false,
+                Gameid = currentGame.Id
             };
             
             context.Boards.Add(board);

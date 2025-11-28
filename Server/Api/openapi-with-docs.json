@@ -380,6 +380,167 @@
         }
       }
     },
+    "/api/Game/create": {
+      "post": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_CreateGame",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/current": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetCurrentGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/current/details": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetCurrentGameDetails",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/draw": {
+      "post": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_DrawWinningNumbers",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrawWinningNumbersDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/history": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetGameHistory",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/{gameId}": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetGameById",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/User/all": {
       "get": {
         "tags": [
@@ -685,6 +846,28 @@
           }
         }
       },
+      "CreateGameDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "weeknumber": {
+            "type": "string"
+          }
+        }
+      },
+      "DrawWinningNumbersDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "winningNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
       "User": {
         "type": "object",
         "additionalProperties": false,
@@ -783,8 +966,56 @@
           "winner": {
             "type": "boolean"
           },
+          "gameid": {
+            "type": "string",
+            "nullable": true
+          },
+          "game": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Game"
+              }
+            ]
+          },
           "user": {
             "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "weeknumber": {
+            "type": "string"
+          },
+          "winningnumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "drawdate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isactive": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "boards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Board"
+            }
           }
         }
       },
