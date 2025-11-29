@@ -6,3 +6,5 @@ public record DeleteUserDTO(string id);
 
 public record UpdateUserDTO(string firstname, string lastname, string email, string phonenumber, string password, decimal balance);
 
+public record SetUserActiveDTO(bool IsActive);
+

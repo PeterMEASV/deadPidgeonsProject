@@ -11,4 +11,7 @@ public interface IUserService
     Task<User> UpdateUserAsync(string id, UpdateUserDTO updateDto);
     Task<bool> DeleteUserAsync(string id);
     Task<object> GetUserDetailsAsync(string id);
+    Task<User> ToggleUserActiveStatusAsync(string id);
+    Task<User> SetUserActiveStatusAsync(string id, bool isActive);
+
 }

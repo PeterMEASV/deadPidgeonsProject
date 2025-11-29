@@ -729,6 +729,80 @@
           }
         }
       }
+    },
+    "/api/User/{id}/toggle-active": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_ToggleUserActiveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/User/{id}/set-active": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_SetUserActiveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserActiveDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -898,6 +972,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "isactive": {
+            "type": "boolean"
+          },
           "balancelogs": {
             "type": "array",
             "items": {
@@ -1062,6 +1139,15 @@
           "balance": {
             "type": "number",
             "format": "decimal"
+          }
+        }
+      },
+      "SetUserActiveDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isActive": {
+            "type": "boolean"
           }
         }
       }

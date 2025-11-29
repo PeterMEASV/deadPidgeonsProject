@@ -986,6 +986,82 @@ export class UserClient {
         }
         return Promise.resolve<FileResponse>(null as any);
     }
+
+    toggleUserActiveStatus(id: string): Promise<User> {
+        let url_ = this.baseUrl + "/api/User/{id}/toggle-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleUserActiveStatus(_response);
+        });
+    }
+
+    protected processToggleUserActiveStatus(response: Response): Promise<User> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as User;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<User>(null as any);
+    }
+
+    setUserActiveStatus(id: string, dto: SetUserActiveDTO): Promise<User> {
+        let url_ = this.baseUrl + "/api/User/{id}/set-active";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSetUserActiveStatus(_response);
+        });
+    }
+
+    protected processSetUserActiveStatus(response: Response): Promise<User> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as User;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<User>(null as any);
+    }
 }
 
 export interface BalanceTransactionResponseDTO {
@@ -1042,6 +1118,7 @@ export interface User {
     balance?: number;
     password?: string;
     timestamp?: string;
+    isactive?: boolean;
     balancelogs?: Balancelog[];
     boards?: Board[];
 }
@@ -1092,6 +1169,10 @@ export interface UpdateUserDTO {
     phonenumber?: string;
     password?: string;
     balance?: number;
+}
+
+export interface SetUserActiveDTO {
+    isActive?: boolean;
 }
 
 export interface FileResponse {

@@ -73,7 +73,12 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger) : I
         {
             throw new KeyNotFoundException("User not found");
         }
-        
+
+        if (!user.Isactive)
+    	{
+        throw new InvalidOperationException("User account is inactive. Please contact administrator to activate your account.");
+   		}
+
         // MATH!!
         decimal boardPrice = CalculateBoardPrice(dto.SelectedNumbers.Count);
         decimal totalPrice = boardPrice * dto.RepeatForWeeks;

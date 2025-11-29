@@ -56,6 +56,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
             Phonenumber = userDto.phonenumber,
             Password = passwordHasher.HashPassword(null, userDto.password),
             Balance = 0,
+            Isactive = false,
             Timestamp = DateTime.UtcNow.ToLocalTime()
         };
 
@@ -67,6 +68,49 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         return user;
     }
 
+    public async Task<User> ToggleUserActiveStatusAsync(string id)
+    {
+        logger.LogInformation("Toggling active status for user {UserId}", id);
+
+        var user = await context.Users.FindAsync(id);
+
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {id} not found");
+        }
+
+        user.Isactive = !user.Isactive;
+
+        await context.SaveChangesAsync();
+
+        logger.LogInformation("User {UserId} is now {Status}", id, user.Isactive ? "ACTIVE" : "INACTIVE");
+
+        return user;
+    }
+
+    public async Task<User> SetUserActiveStatusAsync(string id, bool isActive)
+    {
+        logger.LogInformation("Setting active status for user {UserId} to {Status}", id, isActive);
+
+        var user = await context.Users.FindAsync(id);
+
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {id} not found");
+        }
+
+        user.Isactive = isActive;
+
+        await context.SaveChangesAsync();
+
+        logger.LogInformation("User {UserId} is now {Status}", id, isActive ? "ACTIVE" : "INACTIVE");
+
+        return user;
+    }
+
+    
+    
+    
     public async Task<User> UpdateUserAsync(string id, UpdateUserDTO updateDto)
     {
         logger.LogInformation("Updating user {UserId}", id);

@@ -21,6 +21,8 @@ public partial class User
 
     public DateTime Timestamp { get; set; }
 
+    public bool Isactive { get; set; }
+
     public virtual ICollection<Balancelog> Balancelogs { get; set; } = new List<Balancelog>();
 
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();

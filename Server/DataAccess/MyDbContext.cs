@@ -105,6 +105,9 @@ public partial class MyDbContext : DbContext
                 .HasColumnName("balance");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.Firstname).HasColumnName("firstname");
+            entity.Property(e => e.Isactive)
+                .HasDefaultValue(false)
+                .HasColumnName("isactive");
             entity.Property(e => e.Lastname).HasColumnName("lastname");
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.Phonenumber).HasColumnName("phonenumber");

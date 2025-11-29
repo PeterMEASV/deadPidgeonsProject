@@ -146,6 +146,60 @@ public class UserController : ControllerBase
             return StatusCode(500, "An error occurred while retrieving user details");
         }
     }
-
+    [HttpPatch("{id}/toggle-active")]
+    public async Task<ActionResult<User>> ToggleUserActiveStatus(string id)
+    {
+        try
+        {
+            var user = await _userService.ToggleUserActiveStatusAsync(id);
+            return Ok(new
+            {
+                user.Id,
+                user.Firstname,
+                user.Lastname,
+                user.Email,
+                user.Isactive,
+                Status = user.Isactive ? "Active" : "Inactive",
+                Message = $"User is now {(user.Isactive ? "ACTIVE" : "INACTIVE")}"
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling user active status {Id}", id);
+            return StatusCode(500, "An error occurred while toggling user status");
+        }
+    }
+    
+    [HttpPatch("{id}/set-active")]
+    public async Task<ActionResult<User>> SetUserActiveStatus(string id, [FromBody] SetUserActiveDTO dto)
+    {
+        try
+        {
+            var user = await _userService.SetUserActiveStatusAsync(id, dto.IsActive);
+            return Ok(new
+            {
+                user.Id,
+                user.Firstname,
+                user.Lastname,
+                user.Email,
+                user.Isactive,
+                Status = user.Isactive ? "Active" : "Inactive",
+                Message = $"User is now {(user.Isactive ? "ACTIVE" : "INACTIVE")}"
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting user active status {Id}", id);
+            return StatusCode(500, "An error occurred while setting user status");
+        }
+    }
     
 }
