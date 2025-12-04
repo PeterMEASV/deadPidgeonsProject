@@ -12,12 +12,19 @@ import AdminUsersLatest from "./AdminUsersLatest.tsx";
 import PlayerTransactions from "./PlayerTransactions.tsx";
 import PlayerHistory from "./PlayerHistory.tsx";
 import PlayerNewGame from "./PlayerNewGame.tsx";
+import {Login} from "./Login.tsx";
+import type {LoginResponseDTO} from "./generated-ts-client";
 
+export const userAtom = atom<LoginResponseDTO | null>(null);
 
 export const routesAtom = atom<RouteObject[]>([
     {
         path: '/',
         element: <Home />
+    },
+    {
+        path: 'login',
+        element: <Login />
     },
     {
         path: '/Admin',

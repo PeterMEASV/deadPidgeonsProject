@@ -6,6 +6,38 @@
     "version": "v0.1"
   },
   "paths": {
+    "/api/Auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_Login",
+        "requestBody": {
+          "x-name": "loginDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Balance/deposit": {
       "post": {
         "tags": [
@@ -803,10 +835,99 @@
           }
         }
       }
+    },
+    "/api/User/{id}/set-admin": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_SetUserAdminStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserAdminDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "LoginResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phonenumber": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "isactive": {
+            "type": "boolean"
+          },
+          "isadmin": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
       "BalanceTransactionResponseDTO": {
         "type": "object",
         "additionalProperties": false,
@@ -973,6 +1094,9 @@
             "format": "date-time"
           },
           "isactive": {
+            "type": "boolean"
+          },
+          "isadmin": {
             "type": "boolean"
           },
           "balancelogs": {
@@ -1147,6 +1271,15 @@
         "additionalProperties": false,
         "properties": {
           "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SetUserAdminDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isAdmin": {
             "type": "boolean"
           }
         }

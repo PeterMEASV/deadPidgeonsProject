@@ -202,4 +202,33 @@ public class UserController : ControllerBase
         }
     }
     
+    [HttpPatch("{id}/set-admin")]
+    public async Task<ActionResult<User>> SetUserAdminStatus(string id, [FromBody] SetUserAdminDTO dto)
+    {
+        try
+        {
+            var user = await _userService.SetUserAdminStatusAsync(id, dto.isAdmin);
+            return Ok(new
+            {
+                user.Id,
+                user.Firstname,
+                user.Lastname,
+                user.Email,
+                user.Isadmin,
+                Status = user.Isadmin ? "Admin" : "User",
+                Message = $"User is now {(user.Isadmin ? "ADMIN" : "NORMAL USER")}"
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting user admin status {Id}", id);
+            return StatusCode(500, "An error occurred while setting admin status");
+        }
+    }
+
+    
 }

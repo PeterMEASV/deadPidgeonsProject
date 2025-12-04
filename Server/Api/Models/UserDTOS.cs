@@ -8,3 +8,4 @@ public record UpdateUserDTO(string firstname, string lastname, string email, str
 
 public record SetUserActiveDTO(bool IsActive);
 
+public record SetUserAdminDTO(bool isAdmin);

@@ -108,6 +108,9 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Isactive)
                 .HasDefaultValue(false)
                 .HasColumnName("isactive");
+            entity.Property(e => e.Isadmin)
+                .HasDefaultValue(false)
+                .HasColumnName("isadmin");
             entity.Property(e => e.Lastname).HasColumnName("lastname");
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.Phonenumber).HasColumnName("phonenumber");

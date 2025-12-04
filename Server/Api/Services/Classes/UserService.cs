@@ -57,6 +57,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
             Password = passwordHasher.HashPassword(null, userDto.password),
             Balance = 0,
             Isactive = false,
+            Isadmin = false,
             Timestamp = DateTime.UtcNow.ToLocalTime()
         };
 
@@ -108,7 +109,25 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         return user;
     }
 
-    
+    public async Task<User> SetUserAdminStatusAsync(string id, bool isAdmin)
+		{
+    		logger.LogInformation("Setting admin status for user {UserId} to {Status}", id, isAdmin);
+
+   			 var user = await context.Users.FindAsync(id);
+
+   			 if (user == null)
+   			 {
+        		throw new KeyNotFoundException($"User with ID {id} not found");
+   			 }
+	
+    		user.Isadmin = isAdmin;
+
+    		await context.SaveChangesAsync();
+
+    		logger.LogInformation("User {UserId} is now {Status}", id, isAdmin ? "ADMIN" : "NORMAL USER");
+
+    		return user;
+		}
     
     
     public async Task<User> UpdateUserAsync(string id, UpdateUserDTO updateDto)
@@ -239,4 +258,6 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
             }).OrderByDescending(bl => bl.Timestamp).Take(10).ToList()
         };
     }
+
+		
 }

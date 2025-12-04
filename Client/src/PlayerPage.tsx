@@ -1,8 +1,18 @@
 import {Outlet, useNavigate} from 'react-router';
 import logo from "./Assets/logo_png.png";
+import { useSetAtom } from 'jotai';
+import { userAtom } from './Atoms';
+
 
 function PlayerPage() {
     const navigate = useNavigate()
+    const setUser = useSetAtom(userAtom);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+        navigate('/login');
+    };
 
     return (
         <>
@@ -44,7 +54,7 @@ function PlayerPage() {
                                 </a>
                             </li>
                             <li><a>Settings</a></li>
-                            <li><a>Logout</a></li>
+                            <li><a onClick={handleLogout}>Logout</a></li>
                         </ul>
                     </div>
                 </div>

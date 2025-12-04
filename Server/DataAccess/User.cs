@@ -23,6 +23,8 @@ public partial class User
 
     public bool Isactive { get; set; }
 
+    public bool Isadmin { get; set; }
+
     public virtual ICollection<Balancelog> Balancelogs { get; set; } = new List<Balancelog>();
 
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();

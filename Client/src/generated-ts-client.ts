@@ -7,6 +7,54 @@
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
+export class AuthClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    login(loginDto: LoginDTO): Promise<LoginResponseDTO> {
+        let url_ = this.baseUrl + "/api/Auth/login";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(loginDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLogin(_response);
+        });
+    }
+
+    protected processLogin(response: Response): Promise<LoginResponseDTO> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as LoginResponseDTO;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LoginResponseDTO>(null as any);
+    }
+}
+
 export class BalanceClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -1062,6 +1110,63 @@ export class UserClient {
         }
         return Promise.resolve<User>(null as any);
     }
+
+    setUserAdminStatus(id: string, dto: SetUserAdminDTO): Promise<User> {
+        let url_ = this.baseUrl + "/api/User/{id}/set-admin";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSetUserAdminStatus(_response);
+        });
+    }
+
+    protected processSetUserAdminStatus(response: Response): Promise<User> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as User;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<User>(null as any);
+    }
+}
+
+export interface LoginResponseDTO {
+    id?: string;
+    firstname?: string;
+    lastname?: string;
+    email?: string;
+    phonenumber?: string;
+    balance?: number;
+    isactive?: boolean;
+    isadmin?: boolean;
+    message?: string;
+}
+
+export interface LoginDTO {
+    email?: string;
+    password?: string;
 }
 
 export interface BalanceTransactionResponseDTO {
@@ -1119,6 +1224,7 @@ export interface User {
     password?: string;
     timestamp?: string;
     isactive?: boolean;
+    isadmin?: boolean;
     balancelogs?: Balancelog[];
     boards?: Board[];
 }
@@ -1173,6 +1279,10 @@ export interface UpdateUserDTO {
 
 export interface SetUserActiveDTO {
     isActive?: boolean;
+}
+
+export interface SetUserAdminDTO {
+    isAdmin?: boolean;
 }
 
 export interface FileResponse {
