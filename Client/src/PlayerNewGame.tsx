@@ -25,57 +25,37 @@ export default function PlayerNewGame() {
         });
     };
 
-    // --- Fetch price from backend whenever selected numbers change ---
-    useEffect(() => {
-        const selectedNumbers = Array.from(toggledButtons).map(i => i + 1);
+    // Calculate price, im using fixed prices now. instead of calling backend
+    useEffect(() => { 
+        const count = toggledButtons.size;
 
-        if (selectedNumbers.length < 5) {
+        if (count < 5 || count > 8) {
             setPrice(null);
-            setLoadingPrice(false);  // Ensure it's reset if <5
+            setLoadingPrice(false);
             return;
         }
 
-        setLoadingPrice(true);
-        const abortController = new AbortController();  // New: For cancelling the fetch
+        setLoadingPrice(false); 
 
-        const t = setTimeout(() => {
-            fetch(`${API_BASE}/board/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(selectedNumbers),
-                credentials: "include",  // Ensure auth is included (as in your submit logic)
-                signal: abortController.signal  // New: Attach the abort signal
-            })
-                .then(async res => {
-                    if (!res.ok) throw new Error(await res.text());
-                    return res.json();
-                })
-                .then(data => {
-                    if (!data.isValid) {
-                        setPrice(null);
-                        return;
-                    }
-                    const p = data.price ?? data.Price;  // Handles backend's capital "Price"
-                    setPrice(p);
-                })
-                .catch(err => {
-                    if (err.name === 'AbortError') return;  // New: Ignore aborted fetches
-                    console.error(err);
-                    setPrice(null);
-                })
-                .finally(() => {
-                    setLoadingPrice(false);  // Always reset loading state
-                });
-        }, 150);
+        let fixedPrice: number | null = null;
+        switch (count) {
+            case 5:
+                fixedPrice = 20;
+                break;
+            case 6:
+                fixedPrice = 40;
+                break;
+            case 7:
+                fixedPrice = 80;
+                break;
+            case 8:
+                fixedPrice = 160;
+                break;
+        }
 
-        return () => {
-            abortController.abort();  // New: Abort the fetch on cleanup
-            clearTimeout(t);
-        };
+        setPrice(fixedPrice);
     }, [toggledButtons]);
-
-
-
+    
     // --- Show confirmation modal ---
     const handleEndGame = () => {
         setShowConfirmation(true);
