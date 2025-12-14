@@ -3,6 +3,7 @@ using Api.Security;
 using Api.Services.Classes;
 using Api.Services.Interfaces;
 using DataAccess;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<MyDbContext>(conf =>
 });
 
 builder.Services.AddScoped<KonciousArgon2idPasswordHasher>();
+builder.Services.AddScoped<ITokenService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
@@ -32,9 +34,43 @@ builder.Services.AddOpenApiDocument(config =>
     config.Version = "v0.1";
 });
 
+// Authentication & Authorization
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = JwtService.ValidationParameters(
+            builder.Configuration
+        );
+        // Add this for debugging
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication failed: {context.Exception}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token validated successfully");
+                return Task.CompletedTask;
+            },
+        };
+    });
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 app.UseCors(config => config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

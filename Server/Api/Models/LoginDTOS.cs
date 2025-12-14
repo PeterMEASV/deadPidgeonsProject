@@ -14,5 +14,6 @@ public record LoginResponseDTO(
     decimal balance,
     bool Isactive,
     bool Isadmin, 
+    string token,
 	string message 
 );

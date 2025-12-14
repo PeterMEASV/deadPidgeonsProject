@@ -38,6 +38,26 @@
         }
       }
     },
+    "/api/Auth/userInfo": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_GetUserInfo",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Balance/deposit": {
       "post": {
         "tags": [
@@ -911,6 +931,9 @@
           "isadmin": {
             "type": "boolean"
           },
+          "token": {
+            "type": "string"
+          },
           "message": {
             "type": "string"
           }
@@ -925,141 +948,6 @@
           },
           "password": {
             "type": "string"
-          }
-        }
-      },
-      "BalanceTransactionResponseDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "transactionNumber": {
-            "type": "string"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "SubmitDepositDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "transactionNumber": {
-            "type": "string"
-          }
-        }
-      },
-      "ApproveTransactionDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "transactionId": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "BoardResponseDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "selectedNumbers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "winner": {
-            "type": "boolean"
-          },
-          "price": {
-            "type": "number",
-            "format": "decimal"
-          }
-        }
-      },
-      "CreateBoardDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "selectedNumbers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          "repeatForWeeks": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ValidateBoardDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "selectedNumbers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        }
-      },
-      "CreateGameDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "weeknumber": {
-            "type": "string"
-          }
-        }
-      },
-      "DrawWinningNumbersDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "winningNumbers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         }
       },
@@ -1216,6 +1104,141 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Board"
+            }
+          }
+        }
+      },
+      "BalanceTransactionResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "transactionNumber": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SubmitDepositDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "transactionNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "ApproveTransactionDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "transactionId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BoardResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "selectedNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "winner": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "CreateBoardDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "selectedNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "repeatForWeeks": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValidateBoardDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "selectedNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "CreateGameDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "weeknumber": {
+            "type": "string"
+          }
+        }
+      },
+      "DrawWinningNumbersDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "winningNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         }

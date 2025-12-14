@@ -16,7 +16,6 @@ import {Login} from "./Login.tsx";
 import type {LoginResponseDTO} from "./generated-ts-client";
 
 export const userAtom = atom<LoginResponseDTO | null>(null);
-
 export const routesAtom = atom<RouteObject[]>([
     {
         path: '/',

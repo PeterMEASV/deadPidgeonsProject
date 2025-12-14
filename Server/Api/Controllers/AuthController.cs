@@ -1,5 +1,8 @@
-﻿using Api.Models;
+﻿using System.Security.Claims;
+using Api.Models;
+using Api.Security;
 using Api.Services.Interfaces;
+using DataAccess;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -10,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AuthController> _logger;
+    private readonly ITokenService _tokenService;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger, ITokenService tokenService)
     {
         _authService = authService;
         _logger = logger;
+        _tokenService = tokenService;
     }
     
     [HttpPost("login")]
@@ -43,6 +48,7 @@ public class AuthController : ControllerBase
                 user.Balance,
                 user.Isactive,
                 user.Isadmin,
+                _tokenService.CreateToken(user),
                 "Login successful"
             );
 
@@ -53,5 +59,12 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Error during login");
             return StatusCode(500, "An error occurred during login");
         }
+    }
+
+    [HttpGet]
+    [Route("userInfo")]
+    public async Task<User?> GetUserInfo()
+    {
+        return _authService.GetUserInfo(User);
     }
 }

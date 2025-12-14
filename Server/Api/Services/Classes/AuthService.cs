@@ -1,8 +1,10 @@
-﻿using Api.Models;
+﻿using System.Security.Claims;
+using Api.Models;
 using Api.Security;
 using Api.Services.Interfaces;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Api.Services.Classes;
 
@@ -44,4 +46,24 @@ public class AuthService(
         logger.LogInformation("Login successful for user {UserId} - {Email}", user.Id, user.Email);
         return user;
     }
+    
+    public User? GetUserInfo(ClaimsPrincipal principal)
+    {
+        if (principal?.Identity?.IsAuthenticated != true)
+        {
+            return null;
+        }
+
+        var userId = principal.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return null;
+        }
+
+        return Queryable.SingleOrDefault(
+            context.Users.AsNoTracking(),
+            user => user.Id == userId
+        );
+    }
+    
 }

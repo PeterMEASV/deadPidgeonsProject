@@ -53,6 +53,39 @@ export class AuthClient {
         }
         return Promise.resolve<LoginResponseDTO>(null as any);
     }
+
+    getUserInfo(): Promise<User> {
+        let url_ = this.baseUrl + "/api/Auth/userInfo";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserInfo(_response);
+        });
+    }
+
+    protected processGetUserInfo(response: Response): Promise<User> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as User;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<User>(null as any);
+    }
 }
 
 export class BalanceClient {
@@ -1161,57 +1194,13 @@ export interface LoginResponseDTO {
     balance?: number;
     isactive?: boolean;
     isadmin?: boolean;
+    token?: string;
     message?: string;
 }
 
 export interface LoginDTO {
     email?: string;
     password?: string;
-}
-
-export interface BalanceTransactionResponseDTO {
-    id?: number;
-    userId?: string;
-    amount?: number;
-    transactionNumber?: string;
-    timestamp?: string;
-}
-
-export interface SubmitDepositDTO {
-    userId?: string;
-    amount?: number;
-    transactionNumber?: string;
-}
-
-export interface ApproveTransactionDTO {
-    transactionId?: number;
-}
-
-export interface BoardResponseDTO {
-    id?: string;
-    userId?: string;
-    selectedNumbers?: number[];
-    timestamp?: string;
-    winner?: boolean;
-    price?: number;
-}
-
-export interface CreateBoardDTO {
-    userId?: string;
-    selectedNumbers?: number[];
-    repeatForWeeks?: number;
-}
-
-export interface ValidateBoardDTO {
-    selectedNumbers?: number[];
-}
-
-export interface CreateGameDTO {
-    weeknumber?: string;
-}
-
-export interface DrawWinningNumbersDTO {
-    winningNumbers?: number[];
 }
 
 export interface User {
@@ -1258,6 +1247,51 @@ export interface Game {
     isactive?: boolean;
     timestamp?: string;
     boards?: Board[];
+}
+
+export interface BalanceTransactionResponseDTO {
+    id?: number;
+    userId?: string;
+    amount?: number;
+    transactionNumber?: string;
+    timestamp?: string;
+}
+
+export interface SubmitDepositDTO {
+    userId?: string;
+    amount?: number;
+    transactionNumber?: string;
+}
+
+export interface ApproveTransactionDTO {
+    transactionId?: number;
+}
+
+export interface BoardResponseDTO {
+    id?: string;
+    userId?: string;
+    selectedNumbers?: number[];
+    timestamp?: string;
+    winner?: boolean;
+    price?: number;
+}
+
+export interface CreateBoardDTO {
+    userId?: string;
+    selectedNumbers?: number[];
+    repeatForWeeks?: number;
+}
+
+export interface ValidateBoardDTO {
+    selectedNumbers?: number[];
+}
+
+export interface CreateGameDTO {
+    weeknumber?: string;
+}
+
+export interface DrawWinningNumbersDTO {
+    winningNumbers?: number[];
 }
 
 export interface CreateUserDTO {

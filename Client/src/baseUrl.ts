@@ -1,4 +1,4 @@
-﻿import {BoardClient, UserClient} from "./generated-ts-client.ts";
+﻿import {AuthClient, BoardClient, UserClient} from "./generated-ts-client.ts";
 
 const isProduction = import.meta.env.PROD;
 
@@ -10,3 +10,5 @@ export const finalUrl = isProduction ? prod : dev;
 export const userClient = new UserClient(finalUrl);
 
 export const boardClient = new BoardClient(finalUrl);
+
+export const authClient = new AuthClient(finalUrl);
