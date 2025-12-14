@@ -1,6 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-
-const API_BASE = "http://localhost:5099/api"; // change if needed
+import { boardClient } from "./baseUrl";
 
 export default function PlayerNewGame() {
     const [toggledButtons, setToggledButtons] = useState<Set<number>>(new Set());
@@ -26,7 +25,7 @@ export default function PlayerNewGame() {
     };
 
     // Calculate price, im using fixed prices now. instead of calling backend
-    useEffect(() => { 
+    useEffect(() => {
         const count = toggledButtons.size;
 
         if (count < 5 || count > 8) {
@@ -35,7 +34,7 @@ export default function PlayerNewGame() {
             return;
         }
 
-        setLoadingPrice(false); 
+        setLoadingPrice(false);
 
         let fixedPrice: number | null = null;
         switch (count) {
@@ -55,13 +54,13 @@ export default function PlayerNewGame() {
 
         setPrice(fixedPrice);
     }, [toggledButtons]);
-    
+
     // --- Show confirmation modal ---
     const handleEndGame = () => {
         setShowConfirmation(true);
     };
 
-    // --- Submitting board to backend ---
+
     const submitBoard = async () => {
         const selectedNumbers = Array.from(toggledButtons).map(i => i + 1);
 
@@ -72,27 +71,22 @@ export default function PlayerNewGame() {
 
         try {
             const payload = {
+                userId: "f3e0f67d-658a-489b-b7ac-5723d7853c7f", //todo: hard coded, change.
                 selectedNumbers,
                 repeatForWeeks: 1
             };
-
-            const res = await fetch(`${API_BASE}/board/create`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-                credentials: "include"
-            });
-
-            if (!res.ok) throw new Error(await res.text());
-
-            await res.json();
+            console.log(payload);
+            await boardClient.createBoard(payload);
 
             setSubmitState({ loading: false, success: "spilleplade købt!" });
             setToggledButtons(new Set());
             setPrice(null);
-
         } catch (err: any) {
-            setSubmitState({ loading: false, error: err.message || "kunne ikke købe spilleplade." });
+            const message =
+                typeof err === "string"
+                    ? err
+                    : err?.message || err?.response || "kunne ikke købe spilleplade.";
+            setSubmitState({ loading: false, error: message });
         }
     };
 
