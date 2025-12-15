@@ -1,9 +1,7 @@
 import {useEffect, useState} from "react";
 import type {ApproveTransactionDTO} from "./generated-ts-client.ts";
-import {BalanceClient} from "./generated-ts-client.ts";
-import {finalUrl} from "./baseUrl.ts";
+import {balanceClient} from "./baseUrl.ts";
 
-const balanceClient = new BalanceClient(finalUrl);
 
 function AdminTransactions() {
     const [transactions, setTransactions] = useState<any[]>([]);

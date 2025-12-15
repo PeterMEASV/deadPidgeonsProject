@@ -1281,11 +1281,8 @@
             "type": "string"
           },
           "password": {
-            "type": "string"
-          },
-          "balance": {
-            "type": "number",
-            "format": "decimal"
+            "type": "string",
+            "nullable": true
           }
         }
       },

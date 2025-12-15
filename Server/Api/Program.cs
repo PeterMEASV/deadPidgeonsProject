@@ -4,6 +4,7 @@ using Api.Services.Classes;
 using Api.Services.Interfaces;
 using DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +49,11 @@ builder
         options.TokenValidationParameters = JwtService.ValidationParameters(
             builder.Configuration
         );
-        // Add this for debugging
+
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters.RoleClaimType = "role";
+        options.TokenValidationParameters.NameClaimType = "sub";
+
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
@@ -63,7 +68,13 @@ builder
             },
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        // Globally require users to be authenticated
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 

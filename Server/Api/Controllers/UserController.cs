@@ -1,6 +1,7 @@
 ﻿using Api.Models;
 using Api.Services.Interfaces;
 using DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -19,6 +20,7 @@ public class UserController : ControllerBase
     }
     
     [HttpGet("all")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<User>>> GetAllUsers()
     {
         try
@@ -55,6 +57,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPost("create")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserDTO userDto)
     {
         try
@@ -79,6 +82,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> UpdateUser(string id, [FromBody] UpdateUserDTO updateDto)
     {
         try
@@ -106,6 +110,7 @@ public class UserController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteUser(string id)
     {
         try
@@ -147,6 +152,7 @@ public class UserController : ControllerBase
         }
     }
     [HttpPatch("{id}/toggle-active")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> ToggleUserActiveStatus(string id)
     {
         try
@@ -175,6 +181,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPatch("{id}/set-active")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> SetUserActiveStatus(string id, [FromBody] SetUserActiveDTO dto)
     {
         try
@@ -203,6 +210,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPatch("{id}/set-admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> SetUserAdminStatus(string id, [FromBody] SetUserAdminDTO dto)
     {
         try

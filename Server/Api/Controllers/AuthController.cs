@@ -3,6 +3,7 @@ using Api.Models;
 using Api.Security;
 using Api.Services.Interfaces;
 using DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginDTO loginDto)
     {
         try

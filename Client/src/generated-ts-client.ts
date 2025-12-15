@@ -1307,8 +1307,7 @@ export interface UpdateUserDTO {
     lastname?: string;
     email?: string;
     phonenumber?: string;
-    password?: string;
-    balance?: number;
+    password?: string | undefined;
 }
 
 export interface SetUserActiveDTO {

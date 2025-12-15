@@ -22,16 +22,29 @@ function AdminUsersLatest() {
             lastname: user.lastname,
             email: user.email,
             phonenumber: user.phonenumber,
+            password: undefined,
         });
         (document.getElementById('edit_user_modal') as HTMLDialogElement)?.showModal();
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+        setFormData(prev => {
+
+            //kun tilføjer password hvis den er tom
+            if (name === "password") {
+                return {
+                    ...prev,
+                    password: value.trim() === "" ? undefined : value,
+                };
+            }
+
+            return {
+                ...prev,
+                [name]: value
+            };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -140,6 +153,21 @@ function AdminUsersLatest() {
                             </div>
                         </div>
 
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Password</span>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                    placeholder="Password"
+                                    autoComplete="new-password"
+                                />
+                            </div>
+                        </div>
+
                         <div className="modal-action">
                             <button type="button" className="btn px-6 py-3" onClick={handleCancel}>Cancel</button>
                             <button type="submit" className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3">Save</button>
@@ -153,4 +181,4 @@ function AdminUsersLatest() {
         </>
     )
 }
-export default AdminUsersLatest
+export default AdminUsersLatest;

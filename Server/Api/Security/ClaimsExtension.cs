@@ -5,8 +5,17 @@ namespace Api.Security;
 
 public static class ClaimExtensions
 {
-    public static string GetUserId(this ClaimsPrincipal claims) =>
-        claims.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+    public static string GetUserId(this ClaimsPrincipal claims)
+    {
+        var id =
+            claims.FindFirst("sub")?.Value
+            ?? claims.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(id))
+            throw new UnauthorizedAccessException("Missing user id claim (sub/nameidentifier).");
+
+        return id;
+    }
 
     public static IEnumerable<Claim> ToClaims(this User user) =>
         [new("sub", user.Id.ToString()), new("role", user.Isadmin ? "Admin" : "User")];

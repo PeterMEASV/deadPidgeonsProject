@@ -2,14 +2,17 @@ import {Outlet, useNavigate} from 'react-router';
 import logo from './Assets/logo_png.png';
 import { useSetAtom } from 'jotai';
 import { userAtom } from './Atoms';
+import { useAuth } from './Hooks/auth.tsx';
 
 
 function AdminPage() {
     const navigate = useNavigate()
     const setUser = useSetAtom(userAtom);
+    const { logout } = useAuth();
 
     const handleLogout = () => {
         localStorage.removeItem('user');
+        logout();
         setUser(null);
         navigate('/login');
     };

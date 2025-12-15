@@ -1,5 +1,6 @@
 ﻿using Api.Models;
 using Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -51,6 +52,7 @@ public class BalanceController : ControllerBase
 
    
     [HttpPost("approve")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<BalanceTransactionResponseDTO>> ApproveTransaction([FromBody] ApproveTransactionDTO dto)
     {
         try
@@ -83,6 +85,7 @@ public class BalanceController : ControllerBase
     }
     
     [HttpGet("pending")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<object>>> GetPendingTransactions()
     {
         try
@@ -110,6 +113,7 @@ public class BalanceController : ControllerBase
     }
     
     [HttpGet("approved")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<object>>> GetApprovedTransactions()
     {
         try
@@ -137,6 +141,7 @@ public class BalanceController : ControllerBase
     }
     
     [HttpGet("transactions")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<object>>> GetAllTransactions()
     {
         try

@@ -1,33 +1,30 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { useAtomValue } from 'jotai';
-import { userAtom } from './Atoms';
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useAtomValue } from "jotai";
+import { userInfoAtom } from "./Token";
 
 function Home() {
-    const navigate = useNavigate();
-    const user = useAtomValue(userAtom);
+  const navigate = useNavigate();
+  const userInfo = useAtomValue(userInfoAtom);
 
-    useEffect(() => {
-        // Load user from localStorage
-        const storedUser = localStorage.getItem('user');
+  useEffect(() => {
+    if (!userInfo) {
+      navigate("/login");
+      return;
+    }
 
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            if (parsedUser.isAdmin) {
-                navigate('/admin/game');
-            } else {
-                navigate('/player/game');
-            }
-        } else if (!user) {
-            navigate('/login');
-        }
-    }, [navigate, user]);
+    if (userInfo.isadmin) {
+      navigate("/Admin/Game");
+    } else {
+      navigate("/Player/Game");
+    }
+  }, [navigate, userInfo]);
 
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-            <span className="loading loading-spinner loading-lg"></span>
-        </div>
-    );
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <span className="loading loading-spinner loading-lg"></span>
+    </div>
+  );
 }
 
 export default Home;

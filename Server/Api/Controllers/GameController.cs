@@ -1,5 +1,6 @@
 ﻿using Api.Models;
 using Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -18,6 +19,7 @@ public class GameController : ControllerBase
     }
     
     [HttpPost("create")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<object>> CreateGame([FromBody] CreateGameDTO dto)
     {
         try
@@ -41,6 +43,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("current")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<object>> GetCurrentGame()
     {
         try
@@ -72,6 +75,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("current/details")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<object>> GetCurrentGameDetails()
     {
         try
@@ -85,8 +89,9 @@ public class GameController : ControllerBase
             return StatusCode(500, "An error occurred while getting game details");
         }
     }
-
+    
     [HttpPost("draw")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<object>> DrawWinningNumbers([FromBody] DrawWinningNumbersDTO dto)
     {
         try
@@ -128,6 +133,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("history")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<object>>> GetGameHistory()
     {
         try
@@ -156,6 +162,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("{gameId}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<object>> GetGameById(string gameId)
     {
         try

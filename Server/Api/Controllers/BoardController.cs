@@ -1,6 +1,7 @@
 ﻿using Api.Models;
 using Api.Services.Interfaces;
 using DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -80,6 +81,7 @@ public class BoardController : ControllerBase
     }
 
 	[HttpGet("all")]
+	[Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<BoardResponseDTO>>> GetAllBoards()
     {
         try
