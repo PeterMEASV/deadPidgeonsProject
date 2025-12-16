@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom, getDefaultStore } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { authClient } from "./baseUrl.ts";
 import type { User } from "./generated-ts-client.ts";
@@ -22,5 +22,18 @@ export const userInfoAtom = atom<User | null>(null);
 export const userInfoQueryAtom = atom<Promise<User | null>>(async (get) => {
   const token = get(tokenAtom);
   if (!token) return null;
-  return await authClient.getUserInfo();
+
+  try {
+    return await authClient.getUserInfo();
+  } catch {
+    // Important: clear via atoms so UI updates
+    forceLogout();
+    return null;
+  }
 });
+
+export function forceLogout() {
+  const store = getDefaultStore();
+  store.set(tokenAtom, null);
+  store.set(userInfoAtom, null);
+}

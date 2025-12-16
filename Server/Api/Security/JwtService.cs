@@ -25,7 +25,7 @@ public class JwtService(IConfiguration config) : ITokenService
                 SignatureAlgorithm
             ),
             Subject = new ClaimsIdentity(user.ToClaims()),
-            Expires = DateTime.UtcNow.AddMinutes(5),
+            Expires = DateTime.UtcNow.AddMinutes(10),
         };
         var tokenHandler = new JsonWebTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);

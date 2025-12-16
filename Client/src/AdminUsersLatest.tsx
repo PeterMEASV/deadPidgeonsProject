@@ -1,13 +1,18 @@
 import {useNavigate} from "react-router";
 import {useEffect, useState} from "react";
 import {userClient} from "./baseUrl.ts";
-import type {User, UpdateUserDTO} from "./generated-ts-client.ts";
+import type {SetUserActiveDTO, SetUserAdminDTO, User, UpdateUserDTO} from "./generated-ts-client.ts";
 
 function AdminUsersLatest() {
     const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [formData, setFormData] = useState<UpdateUserDTO>({});
+
+    const [flags, setFlags] = useState<{ isAdmin: boolean; isActive: boolean }>({
+        isAdmin: false,
+        isActive: true,
+    });
 
     useEffect(() => {
         userClient.getAllUsers().then(r => {
@@ -24,6 +29,12 @@ function AdminUsersLatest() {
             phonenumber: user.phonenumber,
             password: undefined,
         });
+
+        setFlags({
+            isAdmin: !!user.isadmin,
+            isActive: user.isactive ?? true,
+        });
+
         (document.getElementById('edit_user_modal') as HTMLDialogElement)?.showModal();
     };
 
@@ -52,11 +63,40 @@ function AdminUsersLatest() {
         if (!selectedUser?.id) return;
 
         try {
-            const updatedUser = await userClient.updateUser(selectedUser.id, formData);
+            // 1) Update basic fields
+            let updatedUser = await userClient.updateUser(selectedUser.id, formData);
+
+            // 2) Update flags if changed (these are not part of UpdateUserDTO)
+            if ((selectedUser.isadmin ?? false) !== flags.isAdmin) {
+                const dto: SetUserAdminDTO = { isAdmin: flags.isAdmin };
+                updatedUser = await userClient.setUserAdminStatus(selectedUser.id, dto);
+            }
+
+            if ((selectedUser.isactive ?? true) !== flags.isActive) {
+                const dto: SetUserActiveDTO = { isActive: flags.isActive };
+                updatedUser = await userClient.setUserActiveStatus(selectedUser.id, dto);
+            }
+
             setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
             (document.getElementById('edit_user_modal') as HTMLDialogElement)?.close();
         } catch (error) {
             console.error('Failed to update user:', error);
+        }
+    };
+
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            await userClient.createUser(formData);
+            const allUsers = await userClient.getAllUsers();
+            console.log('All users:', allUsers);
+            setUsers(allUsers);
+
+            (document.getElementById('create_user_modal') as HTMLDialogElement | null)?.close();
+        } catch (error) {
+            console.error("Create user failed", error);
+
         }
     };
 
@@ -65,11 +105,18 @@ function AdminUsersLatest() {
         setSelectedUser(null);
     };
 
+    const handleCreateCancel = () => {
+        (document.getElementById('create_user_modal') as HTMLDialogElement)?.close();
+        setSelectedUser(null);
+    };
+
     return (
         <>
             <div className="flex justify-center gap-3 mt-6 mb-4">
                 <button className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]" onClick={() => navigate('/admin/users/search')}>Search</button>
                 <button className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]">Latest</button>
+                <button className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]" onClick={() => (document.getElementById('create_user_modal') as HTMLDialogElement)?.showModal()}>Create</button>
+
             </div>
 
             <div className="overflow-x-auto ">
@@ -155,6 +202,40 @@ function AdminUsersLatest() {
 
                         <div className="form-control mb-4">
                             <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Admin</span>
+                                <div className="flex gap-6 w-80">
+                                    <label className="label cursor-pointer gap-3">
+                                        <input type="radio" name="isAdmin" className="radio" checked={flags.isAdmin} onChange={() => setFlags(prev => ({ ...prev, isAdmin: true }))}/>
+                                        <span className="label-text">Yes</span>
+                                    </label>
+
+                                    <label className="label cursor-pointer gap-3">
+                                        <input type="radio" name="isAdmin" className="radio" checked={!flags.isAdmin} onChange={() => setFlags(prev => ({ ...prev, isAdmin: false }))}/>
+                                        <span className="label-text">No</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Active</span>
+                                <div className="flex gap-6 w-80">
+                                    <label className="label cursor-pointer gap-3">
+                                        <input type="radio" name="isActive" className="radio" checked={flags.isActive} onChange={() => setFlags(prev => ({ ...prev, isActive: true }))}/>
+                                        <span className="label-text">Yes</span>
+                                    </label>
+
+                                    <label className="label cursor-pointer gap-3">
+                                        <input type="radio" name="isActive" className="radio" checked={!flags.isActive} onChange={() => setFlags(prev => ({ ...prev, isActive: false }))}/>
+                                        <span className="label-text">No</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
                                 <span className="label-text text-base">Password</span>
                                 <input
                                     type="password"
@@ -176,6 +257,88 @@ function AdminUsersLatest() {
                 </div>
                 <form method="dialog" className="modal-backdrop">
                     <button onClick={handleCancel}>close</button>
+                </form>
+            </dialog>
+
+            <dialog id="create_user_modal" className="modal">
+                <div className="modal-box max-w-2xl">
+                    <h3 className="font-bold text-lg mb-4">Create User</h3>
+                    <form onSubmit={handleCreate}>
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">First Name</span>
+                                <input
+                                    type="text"
+                                    name="firstname"
+                                    value={formData.firstname || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Last Name</span>
+                                <input
+                                    type="text"
+                                    name="lastname"
+                                    value={formData.lastname || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Email</span>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Phone Number</span>
+                                <input
+                                    type="text"
+                                    name="phonenumber"
+                                    value={formData.phonenumber || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-control mb-4">
+                            <div className="flex justify-between items-center gap-8">
+                                <span className="label-text text-base">Password</span>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password || ''}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-80"
+                                    placeholder="Password"
+                                    autoComplete="new-password"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="modal-action">
+                            <button type="button" className="btn px-6 py-3" onClick={handleCreateCancel}>Cancel</button>
+                            <button type="submit" className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3">Create</button>
+                        </div>
+                    </form>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button onClick={handleCreateCancel}>close</button>
                 </form>
             </dialog>
         </>

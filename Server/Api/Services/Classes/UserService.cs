@@ -56,7 +56,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
             Phonenumber = userDto.phonenumber,
             Password = passwordHasher.HashPassword(null, userDto.password),
             Balance = 0,
-            Isactive = false,
+            Isactive = true,
             Isadmin = false,
             Timestamp = DateTime.UtcNow.ToLocalTime()
         };

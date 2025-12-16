@@ -1,5 +1,5 @@
-import {atom} from "jotai";
-import type {RouteObject} from "react-router";
+import { atom } from "jotai";
+import type { RouteObject } from "react-router";
 import Home from "./Home.tsx";
 import AdminPage from "./AdminPage.tsx";
 import PlayerPage from "./PlayerPage.tsx";
@@ -12,71 +12,72 @@ import AdminUsersLatest from "./AdminUsersLatest.tsx";
 import PlayerTransactions from "./PlayerTransactions.tsx";
 import PlayerHistory from "./PlayerHistory.tsx";
 import PlayerNewGame from "./PlayerNewGame.tsx";
-import {Login} from "./Login.tsx";
-import type {LoginResponseDTO} from "./generated-ts-client";
+import { Login } from "./Login.tsx";
+import type { LoginResponseDTO } from "./generated-ts-client";
+import RequireAuth from "./RequireAuth";
 
 export const userAtom = atom<LoginResponseDTO | null>(null);
 export const routesAtom = atom<RouteObject[]>([
-    {
+  {
         path: '/',
         element: <Home />
-    },
-    {
+  },
+  {
         path: 'login',
         element: <Login />
-    },
-    {
-        path: '/Admin',
+  },
+  {
+    element: <RequireAuth />,
+    children: [
+      {
+        path: '/admin',
         element: <AdminPage />,
         children: [
-            {
-                path: 'Game',
-                element: <AdminGame />
-            },
-            {
-                path: 'Users',
-                children: [
-                    {
-                        path: 'Search',
-                        element: <AdminUsersSearch />
-                    },
-                    {
-                        path: 'Latest',
-                        element: <AdminUsersLatest />
-                    }
-                ]
-            },
-            {
-                path: 'Transactions',
-                element: <AdminTransactions />
-            },
-            {
-                path: 'History',
-                element: <AdminHistory />
-            }
-        ]
-    },
-    {
-        path: '/Player',
+          { path: 'game', element: <AdminGame /> },
+          {
+            path: 'users',
+            children: [
+              { path: 'search',
+                element: <AdminUsersSearch />
+              },
+
+              { path: 'latest',
+                element: <AdminUsersLatest />
+              },
+
+            ],
+          },
+          { path: 'transactions',
+            element: <AdminTransactions />
+          },
+
+          { path: 'history',
+            element: <AdminHistory />
+          },
+        ],
+      },
+      {
+        path: '/player',
         element: <PlayerPage />,
         children: [
-            {
-                path: 'Game',
-                element: <PlayerGame />
-            },
-            {
-                path: 'Transactions',
-                element: <PlayerTransactions />
-            },
-            {
-                path: 'History',
-                element: <PlayerHistory />
-            },
-            {
-                path: 'NewGame',
-                element: <PlayerNewGame />
-            }
-            
-        ]
-    }
-])
+          { path: 'game',
+            element: <PlayerGame />
+          },
+
+          { path: 'transactions',
+            element: <PlayerTransactions />
+          },
+
+          { path: 'history',
+            element: <PlayerHistory />
+          },
+
+          { path: 'newgame',
+            element: <PlayerNewGame />
+          },
+
+        ],
+      },
+    ],
+  },
+]);

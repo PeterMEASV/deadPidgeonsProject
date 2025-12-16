@@ -63,7 +63,7 @@ public class UserController : ControllerBase
         try
         {
             var user = await _userService.CreateUserAsync(userDto);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            return Ok(user);
         }
         catch (ArgumentException ex)
         {
