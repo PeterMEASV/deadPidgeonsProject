@@ -6,30 +6,37 @@ import { tokenAtom, userInfoAtom } from "../Token.tsx";
 import type {LoginDTO, User} from "../generated-ts-client.ts";
 
 type AuthHook = {
-    user: User | null;
-    login: (request: LoginDTO) => Promise<void>;
-    logout: () => void;
+  user: User | null;
+  login: (request: LoginDTO) => Promise<void>;
+  logout: () => void;
 };
 
 export const useAuth = () => {
-    const [_, setJwt] = useAtom(tokenAtom);
-    const [user] = useAtom(userInfoAtom);
-    const navigate = useNavigate();
+  const [_, setJwt] = useAtom(tokenAtom);
+  const [user, setUser] = useAtom(userInfoAtom);
+  const navigate = useNavigate();
 
-    const login = async (request: LoginDTO) => {
-        const response = await authClient.login(request);
-        setJwt(response.token!);
-        navigate("/");
-    };
+  const login = async (request: LoginDTO) => {
+    const response = await authClient.login(request);
 
-    const logout = async () => {
-        setJwt(null);
-        navigate("/login");
-    };
+    setJwt(response.token!);
 
-    return {
-        user,
-        login,
-        logout,
-    } as AuthHook;
+    // token is set, so this request will be authenticated
+    const me = await authClient.getUserInfo();
+    setUser(me);
+
+    navigate("/");
+  };
+
+  const logout = async () => {
+    setJwt(null);
+    setUser(null);
+    navigate("/login");
+  };
+
+  return {
+    user,
+    login,
+    logout,
+  } as AuthHook;
 };

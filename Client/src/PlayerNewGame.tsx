@@ -1,11 +1,14 @@
 ﻿import { useEffect, useState } from "react";
 import { boardClient } from "./baseUrl";
+import {useAtomValue} from "jotai";
+import {userInfoAtom} from "./Token.tsx";
 
 export default function PlayerNewGame() {
     const [toggledButtons, setToggledButtons] = useState<Set<number>>(new Set());
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [price, setPrice] = useState<number | null>(null);
     const [loadingPrice, setLoadingPrice] = useState(false);
+    const user = useAtomValue(userInfoAtom);
     const [submitState, setSubmitState] = useState<{ loading: boolean; error?: string; success?: string }>({
         loading: false,
     });
@@ -69,14 +72,21 @@ export default function PlayerNewGame() {
             return;
         }
 
+const userId = user?.id;
+if (!userId) {
+  setSubmitState({ loading: false, error: "Du er ikke logget ind." });
+  return;
+}
+
         try {
             const payload = {
-                userId: "f3e0f67d-658a-489b-b7ac-5723d7853c7f", //todo: hard coded, change.
+                userId: user.id,
                 selectedNumbers,
                 repeatForWeeks: 1
             };
             console.log(payload);
-            await boardClient.createBoard(payload);
+            // safe: userId is string here
+            await boardClient.createBoard({ userId, selectedNumbers, repeatForWeeks: 1 });
 
             setSubmitState({ loading: false, success: "spilleplade købt!" });
             setToggledButtons(new Set());

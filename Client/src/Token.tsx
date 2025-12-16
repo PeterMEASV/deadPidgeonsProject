@@ -1,6 +1,7 @@
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { authClient } from "./baseUrl.ts";
+import type { User } from "./generated-ts-client.ts";
 
 // Storage key for JWT
 export const TOKEN_KEY = "token";
@@ -14,11 +15,12 @@ export const tokenAtom = atomWithStorage<string | null>(
     tokenStorage,
 );
 
-export const userInfoAtom = atom(async (get) => {
-    // Create a dependency on 'token' atom
-    const token = get(tokenAtom);
-    if (!token) return null;
-    // Fetch user-info
-    const userInfo = await authClient.getUserInfo();
-    return userInfo;
+// Writable cache atom (this is what components should read for user.id)
+export const userInfoAtom = atom<User | null>(null);
+
+// Read-only async atom that fetches when token changes
+export const userInfoQueryAtom = atom<Promise<User | null>>(async (get) => {
+  const token = get(tokenAtom);
+  if (!token) return null;
+  return await authClient.getUserInfo();
 });

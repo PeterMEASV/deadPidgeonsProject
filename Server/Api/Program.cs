@@ -9,7 +9,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "ClientCors",
+        policy =>
+            policy
+                .WithOrigins(
+                    "https://mindst-2-commits-client.fly.dev",
+                    "http://localhost:5173"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+    );
+});
 
 var appOptions = builder.Services.AddAppOptions(builder.Configuration);
 
@@ -78,15 +91,21 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-app.UseCors(config => config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseRouting();
+
+app.UseCors("ClientCors");
+
+// Serve Swagger/OpenAPI before auth so it doesn't get caught by the fallback policy
+if (app.Environment.IsDevelopment())
+{
+    app.UseOpenApi();
+    app.UseSwaggerUi();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseOpenApi();
-app.UseSwaggerUi();
 await app.GenerateApiClientsFromOpenApi("/../../client/src/generated-ts-client.ts");
 
 app.Run();
