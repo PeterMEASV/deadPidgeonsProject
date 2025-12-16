@@ -970,6 +970,12 @@
           "phonenumber": {
             "type": "string"
           },
+          "isactive": {
+            "type": "boolean"
+          },
+          "isadmin": {
+            "type": "boolean"
+          },
           "balance": {
             "type": "number",
             "format": "decimal"
@@ -980,12 +986,6 @@
           "timestamp": {
             "type": "string",
             "format": "date-time"
-          },
-          "isactive": {
-            "type": "boolean"
-          },
-          "isadmin": {
-            "type": "boolean"
           },
           "balancelogs": {
             "type": "array",
@@ -1019,12 +1019,12 @@
           "transactionnumber": {
             "type": "string"
           },
+          "approved": {
+            "type": "boolean"
+          },
           "timestamp": {
             "type": "string",
             "format": "date-time"
-          },
-          "approved": {
-            "type": "boolean"
           },
           "user": {
             "$ref": "#/components/schemas/User"

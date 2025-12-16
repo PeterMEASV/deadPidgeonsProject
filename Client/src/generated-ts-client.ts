@@ -1209,11 +1209,11 @@ export interface User {
     lastname?: string;
     email?: string;
     phonenumber?: string;
+    isactive?: boolean;
+    isadmin?: boolean;
     balance?: number;
     password?: string;
     timestamp?: string;
-    isactive?: boolean;
-    isadmin?: boolean;
     balancelogs?: Balancelog[];
     boards?: Board[];
 }
@@ -1223,8 +1223,8 @@ export interface Balancelog {
     userid?: string;
     amount?: number;
     transactionnumber?: string;
-    timestamp?: string;
     approved?: boolean;
+    timestamp?: string;
     user?: User;
 }
 

@@ -17,6 +17,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Game> Games { get; set; }
 
+    public virtual DbSet<Historylog> Historylogs { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -93,6 +95,19 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Winningnumbers).HasColumnName("winningnumbers");
         });
 
+        modelBuilder.Entity<Historylog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("historylog_pkey");
+
+            entity.ToTable("historylog", "deadpidgeons");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Timestamp)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("timestamp");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("users_pkey");
@@ -106,7 +121,7 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.Firstname).HasColumnName("firstname");
             entity.Property(e => e.Isactive)
-                .HasDefaultValue(false)
+                .HasDefaultValue(true)
                 .HasColumnName("isactive");
             entity.Property(e => e.Isadmin)
                 .HasDefaultValue(false)

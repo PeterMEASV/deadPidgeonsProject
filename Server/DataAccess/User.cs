@@ -15,15 +15,15 @@ public partial class User
 
     public string Phonenumber { get; set; } = null!;
 
+    public bool Isactive { get; set; }
+
+    public bool Isadmin { get; set; }
+
     public decimal Balance { get; set; }
 
     public string Password { get; set; } = null!;
 
     public DateTime Timestamp { get; set; }
-
-    public bool Isactive { get; set; }
-
-    public bool Isadmin { get; set; }
 
     public virtual ICollection<Balancelog> Balancelogs { get; set; } = new List<Balancelog>();
 

@@ -13,9 +13,9 @@ public partial class Balancelog
 
     public string Transactionnumber { get; set; } = null!;
 
-    public DateTime Timestamp { get; set; }
-
     public bool Approved { get; set; }
+
+    public DateTime Timestamp { get; set; }
 
     public virtual User User { get; set; } = null!;
 }
