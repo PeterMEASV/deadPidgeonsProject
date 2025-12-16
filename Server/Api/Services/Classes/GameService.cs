@@ -8,9 +8,10 @@ namespace Api.Services.Classes;
 
 public class GameService(MyDbContext context, ILogger<GameService> logger) : IGameService
 {
-    public async Task<Game> CreateGameAsync(CreateGameDTO dto)
+    public async Task<Game> CreateGameAsync()
     {
-        logger.LogInformation("Creating new game for Week {WeekNumber}", dto.Weeknumber);
+        var nextWeekNumber = "1";
+        logger.LogInformation("Creating new game for the Week");
 
         // Deactivate any active games
         var activeGames = await context.Games
@@ -19,21 +20,29 @@ public class GameService(MyDbContext context, ILogger<GameService> logger) : IGa
 
         foreach (var game in activeGames)
         {
+            if (!int.TryParse(game.Weeknumber, out var currentWeekNumber))
+            {
+                throw new InvalidOperationException(
+                    $"Active game's Weeknumber ('{game.Weeknumber}') is not a valid integer, cannot increment."
+                );
+            }
+
+            nextWeekNumber = (currentWeekNumber + 1).ToString();
             game.Isactive = false;
             logger.LogInformation("Deactivated game {GameId}", game.Id);
         }
-        
+
         // Its Creating time
         var newGame = new Game
         {
             Id = Guid.NewGuid().ToString(),
-            Weeknumber = dto.Weeknumber,
+            Weeknumber = nextWeekNumber,
             Winningnumbers = new List<int>(),
             Drawdate = DateTime.Now,
             Isactive = true,
             Timestamp = DateTime.Now
         };
-        
+
         context.Games.Add(newGame);
         await context.SaveChangesAsync();
 

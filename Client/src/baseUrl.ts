@@ -1,5 +1,5 @@
 ﻿import { TOKEN_KEY, tokenStorage} from "./Token.tsx";
-import {AuthClient, BalanceClient, BoardClient, UserClient} from "./generated-ts-client.ts";
+import {AuthClient, BalanceClient, BoardClient, GameClient, UserClient} from "./generated-ts-client.ts";
 
 const isProduction = import.meta.env.PROD;
 
@@ -33,3 +33,5 @@ export const boardClient = new BoardClient(finalUrl, { fetch: customFetch });
 export const authClient = new AuthClient(finalUrl, { fetch: customFetch });
 
 export const balanceClient = new BalanceClient(finalUrl, { fetch: customFetch })
+
+export const gameClient = new GameClient(finalUrl, { fetch: customFetch })

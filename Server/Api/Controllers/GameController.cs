@@ -20,11 +20,11 @@ public class GameController : ControllerBase
     
     [HttpPost("create")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<object>> CreateGame([FromBody] CreateGameDTO dto)
+    public async Task<ActionResult<object>> CreateGame()
     {
         try
         {
-            var game = await _gameService.CreateGameAsync(dto);
+            var game = await _gameService.CreateGameAsync();
 
             return Ok(new
             {

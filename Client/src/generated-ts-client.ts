@@ -595,17 +595,13 @@ export class GameClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    createGame(dto: CreateGameDTO): Promise<FileResponse> {
+    createGame(): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/Game/create";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(dto);
-
         let options_: RequestInit = {
-            body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/octet-stream"
             }
         };
@@ -1284,10 +1280,6 @@ export interface CreateBoardDTO {
 
 export interface ValidateBoardDTO {
     selectedNumbers?: number[];
-}
-
-export interface CreateGameDTO {
-    weeknumber?: string;
 }
 
 export interface DrawWinningNumbersDTO {

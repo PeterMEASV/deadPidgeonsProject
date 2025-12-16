@@ -4,7 +4,7 @@ using DataAccess;
 namespace Api.Services.Interfaces;
 public interface IGameService
 {
-    Task<Game> CreateGameAsync(CreateGameDTO dto);
+    Task<Game> CreateGameAsync();
     Task<Game?> GetCurrentGameAsync();
     Task<Game> DrawWinningNumbersAsync(DrawWinningNumbersDTO dto);
     Task<object> GetCurrentGameDetailsAsync();

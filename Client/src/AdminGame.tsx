@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { gameClient} from "./baseUrl.ts";
 
 function AdminGame() {
     const [toggledButtons, setToggledButtons] = useState<Set<number>>(new Set());
@@ -24,7 +25,9 @@ function AdminGame() {
     const handleConfirm = () => {
         console.log('Game ended');
         setShowConfirmation(false);
-       // når david er done med controllers, så skal afslutte spil logikken tilføjes her.
+        const toggledNumbers = Array.from(toggledButtons).map((i) => i + 1);
+        console.log(gameClient.drawWinningNumbers({ winningNumbers: toggledNumbers }));
+        console.log(gameClient.createGame());
     };
 
     const handleCancel = () => {

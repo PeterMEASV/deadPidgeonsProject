@@ -438,18 +438,6 @@
           "Game"
         ],
         "operationId": "Game_CreateGame",
-        "requestBody": {
-          "x-name": "dto",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGameDTO"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
         "responses": {
           "200": {
             "description": "",
@@ -1218,15 +1206,6 @@
               "type": "integer",
               "format": "int32"
             }
-          }
-        }
-      },
-      "CreateGameDTO": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "weeknumber": {
-            "type": "string"
           }
         }
       },
