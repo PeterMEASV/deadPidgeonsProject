@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services.Classes;
 
-public class BalanceService(MyDbContext context, ILogger<BalanceService> logger) : IBalanceService
+public class BalanceService(MyDbContext context, ILogger<BalanceService> logger, IHistoryService historyService) : IBalanceService
 {
     public async Task<Balancelog> SubmitDepositAsync(SubmitDepositDTO dto)
     {
@@ -44,6 +44,7 @@ public class BalanceService(MyDbContext context, ILogger<BalanceService> logger)
 
         logger.LogInformation("Deposit submitted (PENDING): {TransactionId} for {Amount} DKK", 
             transaction.Id, dto.Amount);
+        await historyService.CreateLog("User "+ dto.UserId + "Successfully submitted new deposit (ID: " + transaction.Id + ", Amount: " + dto.Amount + " DKK)");
 
         return transaction;
     }
@@ -76,6 +77,7 @@ public class BalanceService(MyDbContext context, ILogger<BalanceService> logger)
 
         logger.LogInformation("Transaction {TransactionId} approved. Added {Amount} DKK to user {UserId}",
             transactionId, transaction.Amount, transaction.Userid);
+        await historyService.CreateLog("Successfully approved deposit (ID: " + transaction.Id + ", Amount: " + transaction.Amount + " DKK) for user " + transaction.Userid);
 
         return transaction;
     }

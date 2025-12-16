@@ -238,5 +238,12 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpGet("search/{phonenumber}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<List<User>> SearchUserByPhoneNumber(string phonenumber)
+    {
+        return await _userService.FindUsersByPhoneNumber(phonenumber);
+    }
+
     
 }

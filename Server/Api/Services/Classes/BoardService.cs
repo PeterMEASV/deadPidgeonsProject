@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services.Classes;
 
-public class BoardService(MyDbContext context, ILogger<BoardService> logger) : IBoardService
+public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHistoryService historyService) : IBoardService
 {
     public decimal CalculateBoardPrice(int numberOfFields)
     {
@@ -111,6 +111,7 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger) : I
         
         logger.LogInformation("Created {Count} boards for user {UserId}. Total was {Total} DKK",
             dto.RepeatForWeeks, dto.UserId, totalPrice);
+        await historyService.CreateLog("Successfully created new board(s) (ID: " + createdBoards.First().Id + ", Total: " + totalPrice + " DKK)");
 
         return createdBoards.First();
     }
@@ -166,6 +167,7 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger) : I
         await context.SaveChangesAsync();
         
         logger.LogInformation("Deleted board {BoardId} and refunded {Amount} DKK", boardId, refundAmount);
+        await historyService.CreateLog("Successfully deleted board (ID: " + boardId + ", Refund: " + refundAmount + " DKK)");
         
         return true;
     }

@@ -40,6 +40,7 @@ builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument(config =>

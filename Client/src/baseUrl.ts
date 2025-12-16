@@ -1,5 +1,5 @@
 ﻿import { TOKEN_KEY, tokenStorage, forceLogout } from "./Token.tsx";
-import { AuthClient, BalanceClient, BoardClient, GameClient, UserClient } from "./generated-ts-client.ts";
+import { AuthClient, BalanceClient, BoardClient, GameClient, UserClient, HistoryClient } from "./generated-ts-client.ts";
 
 const isProduction = import.meta.env.PROD;
 
@@ -49,3 +49,5 @@ export const authClient = new AuthClient(finalUrl, { fetch: customFetch });
 export const balanceClient = new BalanceClient(finalUrl, { fetch: customFetch })
 
 export const gameClient = new GameClient(finalUrl, { fetch: customFetch })
+
+export const historyClient = new HistoryClient(finalUrl, { fetch: customFetch })

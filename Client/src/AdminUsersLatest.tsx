@@ -32,7 +32,7 @@ function AdminUsersLatest() {
 
         setFlags({
             isAdmin: !!user.isadmin,
-            isActive: user.isactive ?? true,
+            isActive: user.isactive,
         });
 
         (document.getElementById('edit_user_modal') as HTMLDialogElement)?.showModal();

@@ -581,6 +581,29 @@
         }
       }
     },
+    "/api/History/all": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "operationId": "History_GetAllLogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Historylog"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/User/all": {
       "get": {
         "tags": [
@@ -880,6 +903,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/User/search/{phonenumber}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_SearchUserByPhoneNumber",
+        "parameters": [
+          {
+            "name": "phonenumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
                 }
               }
             }
@@ -1219,6 +1276,22 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "Historylog": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

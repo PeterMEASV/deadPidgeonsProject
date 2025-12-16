@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services.Classes;
 
-public class UserService(MyDbContext context, ILogger<UserService> logger, KonciousArgon2idPasswordHasher passwordHasher) : IUserService
+public class UserService(MyDbContext context, ILogger<UserService> logger, KonciousArgon2idPasswordHasher passwordHasher, IHistoryService historyService) : IUserService
 {
     public async Task<List<User>> GetAllUsersAsync()
     {
@@ -29,6 +29,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
     public async Task<User> CreateUserAsync(CreateUserDTO userDto)
     {
         logger.LogInformation("Creating user {Email}", userDto.email);
+        
 
         //Validator
         if (string.IsNullOrWhiteSpace(userDto.firstname) ||
@@ -65,6 +66,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         await context.SaveChangesAsync();
 
         logger.LogInformation("Created user {UserId} - {Email}", user.Id, user.Email);
+        await historyService.CreateLog("Successfully created new user (ID: " + user.Id + ", Email: " + user.Email +")");
 
         return user;
     }
@@ -85,6 +87,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         await context.SaveChangesAsync();
 
         logger.LogInformation("User {UserId} is now {Status}", id, user.Isactive ? "ACTIVE" : "INACTIVE");
+        await historyService.CreateLog("Successfully changed user status (ID: " + user.Id + ", Email: " + user.Email + ", Status: " + (user.Isactive ? "active" : "inactive") + ")");
 
         return user;
     }
@@ -125,6 +128,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
     		await context.SaveChangesAsync();
 
     		logger.LogInformation("User {UserId} is now {Status}", id, isAdmin ? "ADMIN" : "NORMAL USER");
+            await historyService.CreateLog("Successfully changed user admin status (ID: " + user.Id + ", Email: " + user.Email + ", Status: " + (user.Isactive ? "admin" : "user") + ")");
 
     		return user;
 		}
@@ -175,6 +179,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         await context.SaveChangesAsync();
 
         logger.LogInformation("Updated user {UserId}", id);
+        await historyService.CreateLog("Successfully updated user details (ID: " + user.Id + ", Email: " + user.Email + ")");
 
         return user;
     }
@@ -212,6 +217,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         await context.SaveChangesAsync();
 
         logger.LogInformation("Deleted user {UserId} - {Email}", id, user.Email);
+        await historyService.CreateLog("Successfully deleted user (ID: " + user.Id + ", Email: " + user.Email + ")");
 
         return true;
     }
@@ -259,5 +265,13 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         };
     }
 
-		
+    public Task<List<User>> FindUsersByPhoneNumber(string phoneNumber)
+    {
+        logger.LogInformation("Searching for users with the phone number: " + phoneNumber);
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            return Task.FromResult(new List<User>());
+        }
+        return context.Users.Where(u => u.Phonenumber.Contains(phoneNumber)).ToListAsync();
+    }
 }

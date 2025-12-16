@@ -826,6 +826,50 @@ export class GameClient {
     }
 }
 
+export class HistoryClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAllLogs(): Promise<Historylog[]> {
+        let url_ = this.baseUrl + "/api/History/all";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllLogs(_response);
+        });
+    }
+
+    protected processGetAllLogs(response: Response): Promise<Historylog[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as Historylog[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Historylog[]>(null as any);
+    }
+}
+
 export class UserClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -1179,6 +1223,42 @@ export class UserClient {
         }
         return Promise.resolve<User>(null as any);
     }
+
+    searchUserByPhoneNumber(phonenumber: string): Promise<User[]> {
+        let url_ = this.baseUrl + "/api/User/search/{phonenumber}";
+        if (phonenumber === undefined || phonenumber === null)
+            throw new globalThis.Error("The parameter 'phonenumber' must be defined.");
+        url_ = url_.replace("{phonenumber}", encodeURIComponent("" + phonenumber));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSearchUserByPhoneNumber(_response);
+        });
+    }
+
+    protected processSearchUserByPhoneNumber(response: Response): Promise<User[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as User[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<User[]>(null as any);
+    }
 }
 
 export interface LoginResponseDTO {
@@ -1284,6 +1364,12 @@ export interface ValidateBoardDTO {
 
 export interface DrawWinningNumbersDTO {
     winningNumbers?: number[];
+}
+
+export interface Historylog {
+    id?: string;
+    content?: string;
+    timestamp?: string;
 }
 
 export interface CreateUserDTO {

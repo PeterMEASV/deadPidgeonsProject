@@ -14,5 +14,6 @@ public interface IUserService
     Task<User> ToggleUserActiveStatusAsync(string id);
     Task<User> SetUserActiveStatusAsync(string id, bool isActive);
     Task<User> SetUserAdminStatusAsync(string id, bool isAdmin);
+    Task<List<User>> FindUsersByPhoneNumber(string phoneNumber);
 
 }

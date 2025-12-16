@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Api.Services.Classes;
 
-public class GameService(MyDbContext context, ILogger<GameService> logger) : IGameService
+public class GameService(MyDbContext context, ILogger<GameService> logger, IHistoryService historyService) : IGameService
 {
     public async Task<Game> CreateGameAsync()
     {
@@ -47,6 +47,7 @@ public class GameService(MyDbContext context, ILogger<GameService> logger) : IGa
         await context.SaveChangesAsync();
 
         logger.LogInformation("Created new game {GameId} for Week {WeekNumber}", newGame.Id, newGame.Weeknumber);
+        await historyService.CreateLog("Successfully created new game (ID: " + newGame.Id + ", Week: " + newGame.Weeknumber + ")");
 
         return newGame;
     }
@@ -113,6 +114,7 @@ public class GameService(MyDbContext context, ILogger<GameService> logger) : IGa
         await context.SaveChangesAsync();
 
         logger.LogInformation("Drew winning numbers for game {GameId}. Total winners: {WinnerCount}", currentGame.Id, winnerCount);
+        await historyService.CreateLog("Successfully drew winning numbers for game (ID: " + currentGame.Id + ", total winners: " + winnerCount + ")");
 
         return currentGame;
     }
@@ -212,6 +214,9 @@ public class GameService(MyDbContext context, ILogger<GameService> logger) : IGa
             }).ToList()
         };
     }
+    
+    /*
+     //todo: Skal vi bruge dette eller skal vi bare bruge nuværende (+1) implementation?
     private string GetWeekOfYear(DateTime date)
     {
         var calendar = CultureInfo.CurrentCulture.Calendar;
@@ -220,5 +225,6 @@ public class GameService(MyDbContext context, ILogger<GameService> logger) : IGa
             DayOfWeek.Monday);
         return $"{date.Year}-W{week:00}";
     }
+    */
     
 }
