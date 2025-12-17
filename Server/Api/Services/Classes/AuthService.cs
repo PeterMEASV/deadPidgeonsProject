@@ -5,6 +5,7 @@ using Api.Services.Interfaces;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Authentication;
 
 namespace Api.Services.Classes;
 
@@ -24,7 +25,7 @@ public class AuthService(
         if (user == null)
         {
             logger.LogWarning("Login failed: User with email {Email} not found", loginDto.Email);
-            return null;
+            throw new InvalidCredentialException("Invalid email or password");
         }
 
         // Verify password
@@ -33,14 +34,14 @@ public class AuthService(
         if (result != Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success)
         {
             logger.LogWarning("Login failed: Invalid password");
-            return null;
+            throw new InvalidCredentialException("Invalid email or password");
         }
 
         // TODO: Decied if we want to allow inactive users to login. For now we dont
         if (!user.Isactive && !user.Isadmin) 
         {
             logger.LogWarning("Login failed: User {Email} is inactive", loginDto.Email);
-            return null;
+            throw new AuthenticationException("User is inactive");
         }
 
         logger.LogInformation("Login successful for user {UserId} - {Email}", user.Id, user.Email);
