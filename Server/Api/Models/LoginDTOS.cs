@@ -1,7 +1,12 @@
-﻿namespace Api.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api.Models;
 
 public record LoginDTO(
+    [Required]
+    [EmailAddress]
     string Email,
+    [Required]
     string Password
 );
 

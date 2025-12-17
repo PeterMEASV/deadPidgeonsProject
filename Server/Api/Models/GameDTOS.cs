@@ -1,11 +1,12 @@
-﻿namespace Api.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record CreateGameDTO(
-    string Weeknumber);
+namespace Api.Models;
     
 public record DrawWinningNumbersDTO(
+    [Length(3, 3)]
     List<int> WinningNumbers);
 
+//kun sendt til client, ingen brug for validation.
 public record GameResponseDTO(
     string Id,
     string Weeknumber,
@@ -15,6 +16,7 @@ public record GameResponseDTO(
     int TotalBoards,
     int TotalWinners);
 
+//kun sendt til client, ingen brug for validation.
 public record GameHistoryDTO(
     string Id,
     string Weeknumber,

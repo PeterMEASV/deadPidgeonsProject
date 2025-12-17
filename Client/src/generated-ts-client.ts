@@ -1355,7 +1355,7 @@ export interface BoardResponseDTO {
 export interface CreateBoardDTO {
     userId?: string;
     selectedNumbers?: number[];
-    repeatForWeeks?: number;
+    repeatForWeeks?: number | undefined;
 }
 
 export interface ValidateBoardDTO {

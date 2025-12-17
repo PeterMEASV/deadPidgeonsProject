@@ -1,4 +1,5 @@
 using api;
+using Api;
 using Api.Security;
 using Api.Services.Classes;
 using Api.Services.Interfaces;
@@ -48,6 +49,8 @@ builder.Services.AddOpenApiDocument(config =>
     config.Title = "Dead Pidgeons API";
     config.Version = "v0.1";
 });
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Authentication & Authorization
 builder
@@ -91,6 +94,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+app.UseExceptionHandler();
 app.UseRouting();
 
 app.UseCors("ClientCors");

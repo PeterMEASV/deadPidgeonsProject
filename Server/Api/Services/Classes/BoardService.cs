@@ -81,7 +81,9 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
 
         // MATH!!
         decimal boardPrice = CalculateBoardPrice(dto.SelectedNumbers.Count);
-        decimal totalPrice = boardPrice * dto.RepeatForWeeks;
+        int priceMultiplier = dto.RepeatForWeeks ?? 0;
+
+        decimal totalPrice = boardPrice * (priceMultiplier+1);
 
         if (user.Balance < totalPrice)
         {

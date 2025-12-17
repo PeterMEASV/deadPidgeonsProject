@@ -1,11 +1,18 @@
-﻿namespace Api.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api.Models;
 
 public record CreateBoardDTO(
+    [Required]
     string UserId,
+    [Required]
+    [Length(5,8)]
     List<int> SelectedNumbers,
-    int RepeatForWeeks = 1
+    [Range(1,10)]
+    int? RepeatForWeeks
 );
 
+//kun sendes til client, ingen brug for validation.
 public record BoardResponseDTO(
     string Id,
     string UserId,

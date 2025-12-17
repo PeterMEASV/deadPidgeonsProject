@@ -1,10 +1,12 @@
-﻿namespace Api.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record CreateUserDTO(string firstname, string lastname, string email, string phonenumber, string password);
+namespace Api.Models;
+
+public record CreateUserDTO([Required] string firstname, [Required] string lastname, [Required] [EmailAddress] string email, [Required] [Length(8,8)] [Phone] string phonenumber, [Required] [MinLength(3)] string password);
 
 public record DeleteUserDTO(string id);
 
-public record UpdateUserDTO(string firstname, string lastname, string email, string phonenumber, string? password);
+public record UpdateUserDTO([Required] string firstname, [Required] string lastname, [Required] [EmailAddress] string email, [Required] [Length(8,8)] [Phone] string phonenumber, [MinLength(3)] string? password);
 
 public record SetUserActiveDTO(bool IsActive);
 
