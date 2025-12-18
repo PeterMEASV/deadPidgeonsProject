@@ -37,3 +37,15 @@ public record BoardHistoryResponseDTO(
 public record ValidateBoardDTO(
     List<int> SelectedNumbers
 );
+
+public record BoardHistoryDTO(
+	string BoardId,	
+	string UserId,
+	List<int> SelectedNumbers,
+	bool Winner,
+	decimal Price,
+	string Weeknumber,
+	List<int> WinningNumbers,
+	DateTime DrawDate
+);
+	

@@ -1,4 +1,5 @@
 ﻿using Api.Services.Interfaces;
+using Api.Models;
 using DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,22 @@ public class HistoryController : ControllerBase
     {
         return await _historyService.GetAllLogsAsync();
     }
+    
+    [HttpGet("user/{userId}")]
+    public async Task<ActionResult<List<BoardHistoryDTO>>> GetUserBoardHistory(string userId)
+    {
+        try
+        {
+            var history = await _historyService.GetUserBoardHistoryAsync(userId);
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting board history for user {UserId}", userId);
+            return StatusCode(500, "An error occurred while getting board history");
+        }
+    }
+
 
     
 }
