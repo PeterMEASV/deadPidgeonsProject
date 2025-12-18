@@ -24,5 +24,6 @@ public class HistoryController : ControllerBase
     {
         return await _historyService.GetAllLogsAsync();
     }
+
     
 }
