@@ -184,6 +184,7 @@ public class UserService(MyDbContext context, ILogger<UserService> logger, Konci
         return user;
     }
 
+	//Unused but kept incase needed
     public async Task<bool> DeleteUserAsync(string id)
     {
         logger.LogInformation("Deleting user {UserId}", id);
