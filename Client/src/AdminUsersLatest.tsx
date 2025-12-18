@@ -15,7 +15,7 @@ function AdminUsersLatest() {
     });
 
     useEffect(() => {
-        userClient.getAllUsers().then(r => {
+        void userClient.getAllUsers().then(r => {
             setUsers(r);
         })
     }, [])

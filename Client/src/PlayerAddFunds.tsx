@@ -48,13 +48,17 @@ export default function PlayerAddFunds() {
 
             setAmount(0);
             setTransactionNumber("");
-        } catch (err: any) {
+        } catch (err) {
+            const errorMessage = 
+                err instanceof Error 
+                    ? err.message 
+                    : typeof err === 'object' && err !== null && 'response' in err
+                        ? String((err as Record<string, unknown>).response)
+                        : "Kunne ikke indsætte penge.";
+            
             setState({
                 loading: false,
-                error:
-                    err?.message ||
-                    err?.response ||
-                    "Kunne ikke indsætte penge.",
+                error: errorMessage,
             });
         }
     };

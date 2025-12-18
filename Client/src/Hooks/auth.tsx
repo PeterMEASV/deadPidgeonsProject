@@ -12,7 +12,7 @@ type AuthHook = {
 };
 
 export const useAuth = () => {
-  const [_, setJwt] = useAtom(tokenAtom);
+  const [, setJwt] = useAtom(tokenAtom);
   const [user, setUser] = useAtom(userInfoAtom);
   const navigate = useNavigate();
 
@@ -25,13 +25,13 @@ export const useAuth = () => {
     const me = await authClient.getUserInfo();
     setUser(me);
 
-    navigate("/");
+    void navigate("/");
   };
 
-  const logout = async () => {
+  const logout =  () => {
     setJwt(null);
     setUser(null);
-    navigate("/login");
+    void navigate("/login");
   };
 
   return {

@@ -3,6 +3,18 @@ import { boardClient, authClient } from "./baseUrl";
 import {useAtomValue, useSetAtom} from "jotai";
 import {userInfoAtom} from "./Token.tsx";
 
+// Define error response type
+interface ErrorResponse {
+    response?: string;
+    message?: string;
+    status?: number;
+}
+
+interface ParsedErrorData {
+    message?: string;
+    title?: string;
+}
+
 export default function PlayerNewGame() {
     const [toggledButtons, setToggledButtons] = useState<Set<number>>(new Set());
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -91,7 +103,9 @@ export default function PlayerNewGame() {
             setToggledButtons(new Set());
             setPrice(null);
             setRepeat(false);
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as ErrorResponse;
+            
             // Check if it's actually a success (status 201) treated as error
             if (err?.status === 201) {
                 
@@ -99,7 +113,7 @@ export default function PlayerNewGame() {
                     const updatedUser = await authClient.getUserInfo();
                     setUser(updatedUser);
                 } catch (refreshError) {
-                    
+                    console.error("Failed to refresh user info:", refreshError);
                 }
                 
                 setSubmitState({ loading: false, success: "spilleplade købt!" });
@@ -114,18 +128,18 @@ export default function PlayerNewGame() {
             
             if (err?.response) {
                 try {
-                    const errorData = JSON.parse(err.response);
+                    const errorData = JSON.parse(err.response) as ParsedErrorData;
                     message = errorData.message || errorData.title || err.response;
                 } catch {
                     message = err.response;
                 }
             } else if (err?.message) {
-            message = err.message;
+                message = err.message;
+            }
+            
+            setSubmitState({ loading: false, error: message });
         }
-        
-        setSubmitState({ loading: false, error: message });
-    }
-};
+    };
 
     // --- Confirm button inside modal ---
     const handleConfirmSubmit = async () => {

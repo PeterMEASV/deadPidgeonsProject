@@ -10,11 +10,11 @@ function AdminPage() {
     const setUser = useSetAtom(userAtom);
     const { logout } = useAuth();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         localStorage.removeItem('user');
         logout();
         setUser(null);
-        navigate('/login');
+        await navigate('/login');
     };
 
     return (

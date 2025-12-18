@@ -1,32 +1,50 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import type {ApproveTransactionDTO} from "./generated-ts-client.ts";
 import {balanceClient} from "./baseUrl.ts";
 
+// Define a proper type for transactions (since the generated client returns any[])
+interface Transaction {
+    id: number;
+    transactionNumber?: string;
+    transactionnumber?: string;
+    userId?: string;
+    userid?: string;
+    amount: number;
+    timestamp: string;
+}
 
 function AdminTransactions() {
-    const [transactions, setTransactions] = useState<any[]>([]);
-    const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [showPending, setShowPending] = useState(true);
+
+    const loadTransactions = useCallback(() => {
+        if (showPending) {
+            void balanceClient.getPendingTransactions()
+                .then(r => {
+                    console.log('Pending transactions:', r);
+                    setTransactions(r as Transaction[]);
+                })
+                .catch(error => {
+                    console.error('Failed to load pending transactions:', error);
+                });
+        } else {
+            void balanceClient.getApprovedTransactions()
+                .then(r => {
+                    console.log('Approved transactions:', r);
+                    setTransactions(r as Transaction[]);
+                })
+                .catch(error => {
+                    console.error('Failed to load approved transactions:', error);
+                });
+        }
+    }, [showPending]);
 
     useEffect(() => {
         loadTransactions();
-    }, [showPending]);
+    }, [loadTransactions]);
 
-    const loadTransactions = () => {
-        if (showPending) {
-            balanceClient.getPendingTransactions().then(r => {
-                console.log('Pending transactions:', r);
-                setTransactions(r);
-            });
-        } else {
-            balanceClient.getApprovedTransactions().then(r => {
-                console.log('Approved transactions:', r);
-                setTransactions(r);
-            });
-        }
-    };
-
-    const handleTransactionClick = (e: React.MouseEvent, transaction: any) => {
+    const handleTransactionClick = (e: React.MouseEvent, transaction: Transaction): void => {
         e.stopPropagation();
         if (showPending) {
             setSelectedTransaction(transaction);
@@ -34,7 +52,7 @@ function AdminTransactions() {
         }
     };
 
-    const handleApprove = async () => {
+    const handleApprove = async (): Promise<void> => {
         if (!selectedTransaction?.id) return;
 
         try {
@@ -50,14 +68,22 @@ function AdminTransactions() {
         }
     };
 
-    const handleCancel = () => {
+    const handleCancel = (): void => {
         (document.getElementById('approve_transaction_modal') as HTMLDialogElement)?.close();
         setSelectedTransaction(null);
     };
 
-    const formatDate = (timestamp?: string) => {
+    const formatDate = (timestamp?: string): string => {
         if (!timestamp) return 'N/A';
         return new Date(timestamp).toLocaleString('da-DK');
+    };
+
+    const getTransactionNumber = (transaction: Transaction): string => {
+        return transaction.transactionNumber ?? transaction.transactionnumber ?? 'N/A';
+    };
+
+    const getUserId = (transaction: Transaction): string => {
+        return transaction.userId ?? transaction.userid ?? 'N/A';
     };
 
     return (
@@ -101,8 +127,8 @@ function AdminTransactions() {
                                 className={`text-center ${index % 2 !== 0 ? 'bg-[#bfbfbd]' : ''} ${showPending ? 'cursor-pointer' : ''}`}
                                 onClick={(e) => showPending && handleTransactionClick(e, transaction)}
                             >
-                                <td className={showPending ? "hover:bg-base-300" : ""}>{transaction.transactionNumber || transaction.transactionnumber}</td>
-                                <td className={showPending ? "hover:bg-base-300" : ""}>{transaction.userId || transaction.userid}</td>
+                                <td className={showPending ? "hover:bg-base-300" : ""}>{getTransactionNumber(transaction)}</td>
+                                <td className={showPending ? "hover:bg-base-300" : ""}>{getUserId(transaction)}</td>
                                 <td className={showPending ? "hover:bg-base-300" : ""}>{transaction.amount} kr</td>
                                 <td className={showPending ? "hover:bg-base-300" : ""}>{formatDate(transaction.timestamp)}</td>
                             </tr>
@@ -112,11 +138,6 @@ function AdminTransactions() {
                 </table>
             </div>
 
-
-
-
-
-
             <dialog id="approve_transaction_modal" className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg mb-4">Approve Transaction</h3>
@@ -124,11 +145,11 @@ function AdminTransactions() {
                         <div className="space-y-4">
                             <div className="flex justify-between">
                                 <span className="font-semibold">Transaction Number:</span>
-                                <span>{selectedTransaction.transactionNumber || selectedTransaction.transactionnumber}</span>
+                                <span>{getTransactionNumber(selectedTransaction)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-semibold">User ID:</span>
-                                <span>{selectedTransaction.userId || selectedTransaction.userid}</span>
+                                <span>{getUserId(selectedTransaction)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Amount:</span>
@@ -149,7 +170,7 @@ function AdminTransactions() {
                         <button
                             type="button"
                             className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3"
-                            onClick={handleApprove}>Approve</button>
+                            onClick={() => void handleApprove()}>Approve</button>
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">

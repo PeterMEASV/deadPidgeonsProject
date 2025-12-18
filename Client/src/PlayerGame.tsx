@@ -51,7 +51,7 @@ export default function PlayerGame() {
           .filter((b): b is PlayerBoard => b !== null);
 
         setBoards(mapped);
-      } catch (err) {
+      } catch {
         setError("kunne ikke finde igangværende spilleplader.");
       } finally {
         setLoading(false);

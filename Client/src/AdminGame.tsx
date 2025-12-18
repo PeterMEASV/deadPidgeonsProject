@@ -22,7 +22,7 @@ function AdminGame() {
         setShowConfirmation(true);
     };
 
-    const handleConfirm = async () => {
+    const handleConfirm = () => {
         console.log('Game ended');
         setShowConfirmation(false);
         const toggledNumbers = Array.from(toggledButtons).map((i) => i + 1);

@@ -8,31 +8,35 @@ function AdminGameHistory() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        gameClient.getGameHistory().then((r) => {
-            console.log('Game history response:', r);
-            setGames(r);
-        });
+        void gameClient.getGameHistory()
+            .then((r) => {
+                console.log('Game history response:', r);
+                setGames(r);
+            })
+            .catch((error) => {
+                console.error('Failed to load game history:', error);
+            });
     }, []);
 
-    const formatDate = (game: GameResponseDTO) => {
-        const dateValue = (game as any).drawDate ?? (game as any).drawdate;
+    const formatDate = (game: GameResponseDTO): string => {
+        const dateValue = (game as Record<string, unknown>).drawDate ?? (game as Record<string, unknown>).drawdate;
         if (!dateValue) return "N/A";
-        return new Date(dateValue).toLocaleString("da-DK");
+        return new Date(dateValue as string).toLocaleString("da-DK");
     };
 
-    const formatWinningNumbers = (game: GameResponseDTO) => {
-        const numbers = (game as any).winningNumbers ?? (game as any).winningnumbers;
-        if (!numbers || numbers.length === 0) return "Not drawn yet";
+    const formatWinningNumbers = (game: GameResponseDTO): string => {
+        const numbers = (game as Record<string, unknown>).winningNumbers ?? (game as Record<string, unknown>).winningnumbers;
+        if (!numbers || !Array.isArray(numbers) || numbers.length === 0) return "Not drawn yet";
         return numbers.join(", ");
     };
 
-    const getIsActive = (game: GameResponseDTO) => {
-        return (game as any).isActive ?? (game as any).isactive ?? false;
+    const getIsActive = (game: GameResponseDTO): boolean => {
+        return ((game as Record<string, unknown>).isActive ?? (game as Record<string, unknown>).isactive ?? false) as boolean;
     };
 
-    const handleGameClick = (game: GameResponseDTO) => {
+    const handleGameClick = async (game: GameResponseDTO): Promise<void> => {
         if (game.id) {
-            navigate(`/admin/GameHistory/${game.id}`);
+            await navigate(`/admin/GameHistory/${game.id}`);
         }
     };
 

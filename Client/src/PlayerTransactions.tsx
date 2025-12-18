@@ -35,14 +35,14 @@ export default function PlayerTransactions() {
                 // SAME PATTERN AS PlayerGame
                 const result = await balanceClient.getUserTransactions(userId);
                 setTransactions(result);
-            } catch (err) {
+            } catch {
                 setError("Kunne ikke hente dine transaktioner.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchTransactions();
+        void fetchTransactions();
     }, [user]);
 
     const formatDate = (timestamp?: string) => {

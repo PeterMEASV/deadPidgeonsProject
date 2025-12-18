@@ -7,8 +7,8 @@ function AdminHistory() {
   const navigate = useNavigate();
   const [logs, setLogs] = useState<Historylog[]>([]);
 
-  useEffect(() => {
-    historyClient.getAllLogs().then((r) => {
+  useEffect( () => {
+    void historyClient.getAllLogs().then((r) => {
       setLogs(r);
     });
   }, []);

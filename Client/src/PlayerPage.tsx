@@ -16,7 +16,7 @@ function PlayerPage() {
         localStorage.removeItem('user');
         logout();
         setUser(null);
-        navigate('/login');
+        void navigate('/login');
     };
 
     const getUserName = () => {

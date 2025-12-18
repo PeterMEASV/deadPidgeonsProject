@@ -9,14 +9,14 @@ function Home() {
 
   useEffect(() => {
     if (!userInfo) {
-      navigate("/login");
+      void navigate("/login");
       return;
     }
 
     if (userInfo.isadmin) {
-      navigate("/Admin/Game");
+      void navigate("/Admin/Game");
     } else {
-      navigate("/Player/Game");
+      void navigate("/Player/Game");
     }
   }, [navigate, userInfo]);
 

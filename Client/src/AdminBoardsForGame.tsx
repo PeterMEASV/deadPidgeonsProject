@@ -10,7 +10,7 @@ function AdminBoardsForGame() {
 
     useEffect(() => {
         if (gameId) {
-            boardClient.getBoardForGame(gameId).then((r) => {
+            void boardClient.getBoardForGame(gameId).then((r) => {
                 console.log('Boards for game response:', r);
                 setBoards(r ?? []);
             });

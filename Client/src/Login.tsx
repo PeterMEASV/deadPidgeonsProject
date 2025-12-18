@@ -17,7 +17,7 @@ export function Login() {
     try {
       await login({ email, password });
       // navigation is handled inside the hook
-    } catch (err) {
+    } catch{
       setError("Invalid email or password, or account is inactive");
     } finally {
       setLoading(false);

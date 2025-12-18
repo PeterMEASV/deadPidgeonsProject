@@ -60,7 +60,7 @@ function AdminUsersSearch() {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [searchQuery]);
+  }, [handleSearch, searchQuery]);
 
   //mere lort nakket fra latest.tsx
   const handleUserClick = (user: User) => {
