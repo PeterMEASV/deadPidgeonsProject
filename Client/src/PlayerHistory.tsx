@@ -3,18 +3,20 @@ import { useAtomValue } from "jotai";
 import { userInfoAtom } from "./Token.tsx";
 import { historyClient } from "./baseUrl";
 
-interface PlayerHistoryItem {
+interface BoardHistoryDTO {
     boardId: string;
     selectedNumbers: number[];
-    weekNumber: number;
-    won: boolean;
+    weekNumber: string;
+    winner: boolean;
     winningNumbers?: number[];
-    playedAt: string;
+    drawDate: string;
 }
+
 
 export default function PlayerHistory() {
     const user = useAtomValue(userInfoAtom);
-    const [history, setHistory] = useState<PlayerHistoryItem[]>([]);
+
+    const [history, setHistory] = useState<BoardHistoryDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,10 +28,16 @@ export default function PlayerHistory() {
         }
 
         historyClient
-            .getPlayerHistory(user.id)
-            .then(r => setHistory(r))
-            .catch(() => setError("Kunne ikke hente historik."))
-            .finally(() => setLoading(false));
+            .getUserBoardHistory(user.id)
+            .then(r => {
+                setHistory(r);
+            })
+            .catch(() => {
+                setError("Kunne ikke hente spilhistorik.");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [user]);
 
     const formatDate = (timestamp?: string) => {
@@ -73,22 +81,23 @@ export default function PlayerHistory() {
                             >
                                 <td>{h.boardId.slice(0, 8)}</td>
                                 <td>{h.selectedNumbers.join(", ")}</td>
-                                <td>{h.weekNumber}</td>
+                                <td>{h.weekNumber || "N/A"}</td>
+
                                 <td
                                     className={
-                                        h.won
+                                        h.winner
                                             ? "text-green-600 font-semibold"
                                             : "text-gray-500"
                                     }
                                 >
-                                    {h.won ? "Vundet" : "Tabt"}
+                                    {h.winner ? "Vundet" : "Tabt"}
                                 </td>
                                 <td>
-                                    {h.winningNumbers?.length
+                                    {h.winningNumbers && h.winningNumbers.length > 0
                                         ? h.winningNumbers.join(", ")
                                         : "-"}
                                 </td>
-                                <td>{formatDate(h.playedAt)}</td>
+                                <td>{formatDate(h.drawDate)}</td>
                             </tr>
                         ))
                     )}
