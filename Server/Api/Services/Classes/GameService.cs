@@ -63,7 +63,7 @@ public class GameService(MyDbContext context, ILogger<GameService> logger, IHist
                 true
             );
             
-                    await boardService.CreateBoardAsync(newBoard);
+                    await boardService.CreateBoardAsync(newBoard, true);
                 }
             }
 

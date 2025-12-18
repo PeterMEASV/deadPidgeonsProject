@@ -24,7 +24,7 @@ public class BoardController : ControllerBase
 	{
 		try
 		{
-			var board = await _boardService.CreateBoardAsync(dto);
+			var board = await _boardService.CreateBoardAsync(dto, false);
 			
 			var response = new BoardResponseDTO(
 			board.Id,

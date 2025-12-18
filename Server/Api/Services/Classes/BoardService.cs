@@ -46,7 +46,7 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
         return true;
     }
 
-    public async Task<Board> CreateBoardAsync(CreateBoardDTO dto)
+    public async Task<Board> CreateBoardAsync(CreateBoardDTO dto, bool isSystemRenewal)
     {
         logger.LogInformation("Creating board for user {UserId}", dto.UserId);
         
@@ -62,6 +62,17 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
         if (currentGame == null)
         {
             throw new InvalidOperationException("No active game available. Please contact administrator.");
+        }
+
+
+        if (isSystemRenewal == false)
+        {
+            var danishTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+            var danishTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, danishTimeZone);
+            if (danishTime.DayOfWeek == DayOfWeek.Saturday && danishTime.Hour >= 17)
+            {
+                throw new InvalidOperationException("Cannot purchase boards during the weekend.");
+            }
         }
 
         // Check if winning numbers already drawn

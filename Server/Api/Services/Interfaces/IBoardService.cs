@@ -5,7 +5,7 @@ namespace Api.Services.Interfaces;
 
 public interface IBoardService
 {
-    Task<Board> CreateBoardAsync(CreateBoardDTO Dto);
+    Task<Board> CreateBoardAsync(CreateBoardDTO Dto, bool isSystemRenewal);
     Task<List<Board>> GetBoardsByUserAsync(string userId);
     Task<List<Board>> GetActiveBoardsByUserAsync(string userId);
     Task<List<Board>> GetAllBoardsAsync();
