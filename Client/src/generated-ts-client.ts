@@ -307,7 +307,7 @@ export class BalanceClient {
         return Promise.resolve<any[]>(null as any);
     }
 
-    getUserBalance(userId: string): Promise<FileResponse> {
+    getUserBalance(userId: string): Promise<UserBalanceResponseDTO> {
         let url_ = this.baseUrl + "/api/Balance/user/{userId}";
         if (userId === undefined || userId === null)
             throw new globalThis.Error("The parameter 'userId' must be defined.");
@@ -317,7 +317,7 @@ export class BalanceClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -326,26 +326,21 @@ export class BalanceClient {
         });
     }
 
-    protected processGetUserBalance(response: Response): Promise<FileResponse> {
+    protected processGetUserBalance(response: Response): Promise<UserBalanceResponseDTO> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserBalanceResponseDTO;
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse>(null as any);
+        return Promise.resolve<UserBalanceResponseDTO>(null as any);
     }
 }
 
@@ -1311,6 +1306,7 @@ export interface Board {
     timestamp?: string;
     winner?: boolean;
     gameid?: string | undefined;
+    repeat?: boolean;
     game?: Game | undefined;
     user?: User;
 }
@@ -1343,6 +1339,18 @@ export interface ApproveTransactionDTO {
     transactionId?: number;
 }
 
+export interface UserBalanceResponseDTO {
+    userId?: string;
+    userName?: string;
+    currentBalance?: number;
+    totalDeposits?: number;
+    pendingDeposits?: number;
+    transactionCount?: number;
+    approvedCount?: number;
+    pendingCount?: number;
+    recentTransactions?: BalanceTransactionResponseDTO[];
+}
+
 export interface BoardResponseDTO {
     id?: string;
     userId?: string;
@@ -1355,7 +1363,7 @@ export interface BoardResponseDTO {
 export interface CreateBoardDTO {
     userId?: string;
     selectedNumbers?: number[];
-    repeatForWeeks?: number | undefined;
+    repeat?: boolean;
 }
 
 export interface ValidateBoardDTO {

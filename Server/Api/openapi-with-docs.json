@@ -238,10 +238,9 @@
           "200": {
             "description": "",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "$ref": "#/components/schemas/UserBalanceResponseDTO"
                 }
               }
             }
@@ -1104,6 +1103,9 @@
             "type": "string",
             "nullable": true
           },
+          "repeat": {
+            "type": "boolean"
+          },
           "game": {
             "nullable": true,
             "oneOf": [
@@ -1203,6 +1205,48 @@
           }
         }
       },
+      "UserBalanceResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "currentBalance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "totalDeposits": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "pendingDeposits": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "transactionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BalanceTransactionResponseDTO"
+            }
+          }
+        }
+      },
       "BoardResponseDTO": {
         "type": "object",
         "additionalProperties": false,
@@ -1247,10 +1291,8 @@
               "format": "int32"
             }
           },
-          "repeatForWeeks": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+          "repeat": {
+            "type": "boolean"
           }
         }
       },
