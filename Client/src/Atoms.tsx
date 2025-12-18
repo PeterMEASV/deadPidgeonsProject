@@ -12,6 +12,7 @@ import AdminUsersLatest from "./AdminUsersLatest.tsx";
 import PlayerTransactions from "./PlayerTransactions.tsx";
 import PlayerHistory from "./PlayerHistory.tsx";
 import PlayerNewGame from "./PlayerNewGame.tsx";
+import PlayerAddFunds from "./PlayerAddFunds.tsx";
 import { Login } from "./Login.tsx";
 import type { LoginResponseDTO } from "./generated-ts-client";
 import RequireAuth from "./RequireAuth";
@@ -74,7 +75,10 @@ export const routesAtom = atom<RouteObject[]>([
 
           { path: 'newgame',
             element: <PlayerNewGame />
-          },
+          }, 
+            { path: 'add',
+              element: <PlayerAddFunds />  
+            },
 
         ],
       },

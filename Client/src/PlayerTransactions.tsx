@@ -60,10 +60,10 @@ export default function PlayerTransactions() {
                 <h1 className="text-3xl font-bold">dine transaktioner</h1>
 
                 <button
-                    className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3 text-lg"
-                    onClick={() => navigate("/player/balance/add")}
+                    className="btn bg-[#E50006FF] text-white hover:bg-[#AF0006FF] px-6 py-3"
+                    onClick={() => navigate("/player/add")}
                 >
-                    indsæt penge
+                    Indsæt penge
                 </button>
             </div>
 
