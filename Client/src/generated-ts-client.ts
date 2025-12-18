@@ -905,6 +905,42 @@ export class HistoryClient {
         }
         return Promise.resolve<Historylog[]>(null as any);
     }
+
+    getUserBoardHistory(userId: string): Promise<BoardHistoryDTO[]> {
+        let url_ = this.baseUrl + "/api/History/user/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserBoardHistory(_response);
+        });
+    }
+
+    protected processGetUserBoardHistory(response: Response): Promise<BoardHistoryDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BoardHistoryDTO[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardHistoryDTO[]>(null as any);
+    }
 }
 
 export class UserClient {
@@ -1421,6 +1457,17 @@ export interface Historylog {
     id?: string;
     content?: string;
     timestamp?: string;
+}
+
+export interface BoardHistoryDTO {
+    boardId?: string;
+    userId?: string;
+    selectedNumbers?: number[];
+    winner?: boolean;
+    price?: number;
+    weeknumber?: string;
+    winningNumbers?: number[];
+    drawDate?: string;
 }
 
 export interface CreateUserDTO {
