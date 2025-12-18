@@ -1,68 +1,67 @@
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { userClient } from "./baseUrl.ts";
 import type { SetUserActiveDTO, SetUserAdminDTO, UpdateUserDTO, User } from "./generated-ts-client";
 
 function AdminUsersSearch() {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  //bare taget fra latest.tsx
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<UpdateUserDTO>({});
-  const [flags, setFlags] = useState<{ isAdmin: boolean; isActive: boolean }>({
-    isAdmin: false,
-    isActive: true,
-  });
+    //bare taget fra latest.tsx
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [formData, setFormData] = useState<UpdateUserDTO>({});
+    const [flags, setFlags] = useState<{ isAdmin: boolean; isActive: boolean }>({
+        isAdmin: false,
+        isActive: true,
+    });
 
-   //bruger override for at fixe problemet med søgning
-  const handleSearch = async (queryOverride?: string) => {
-    const q = (queryOverride ?? searchQuery).trim();
-    setError(null);
+    // Wrap handleSearch in useCallback - but it doesn't need searchQuery as dependency
+    const handleSearch = useCallback(async (queryOverride?: string) => {
+        const q = queryOverride?.trim();
+        setError(null);
 
-    if (!q) {
-      setUsers([]);
-      return;
-    }
+        if (!q) {
+            setUsers([]);
+            return;
+        }
 
-    setLoading(true);
-    try {
-      const result = await userClient.searchUserByPhoneNumber(q);
-      setUsers(Array.isArray(result) ? result : []);
-    } catch (e) {
-      console.error("Search failed", e);
-      setError("Search failed. Please try again.");
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setLoading(true);
+        try {
+            const result = await userClient.searchUserByPhoneNumber(q);
+            setUsers(Array.isArray(result) ? result : []);
+        } catch (e) {
+            console.error("Search failed", e);
+            setError("Search failed. Please try again.");
+            setUsers([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []); // Empty dependency array since we always use the parameter
 
-  useEffect(() => {
-    const q = searchQuery.trim();
+    useEffect(() => {
+        const q = searchQuery.trim();
 
+        //query mimnimum ændrer vi her
+        if (q.length < 3) {
+            setUsers([]);
+            setError(null);
+            return;
+        }
 
-    //query mimnimum ændrer vi her
-    if (q.length < 3) {
-      setUsers([]);
-      setError(null);
-      return;
-    }
+        //debouncer, står i ms
+        const timeoutId = window.setTimeout(() => {
+            void handleSearch(q);
+        }, 400);
 
-    //debouncer, står i ms
-    const timeoutId = window.setTimeout(() => {
-      void handleSearch(q);
-    }, 400);
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [searchQuery, handleSearch]); // Now handleSearch is stable
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [handleSearch, searchQuery]);
-
-  //mere lort nakket fra latest.tsx
+    //mere lort nakket fra latest.tsx
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
     setFormData({

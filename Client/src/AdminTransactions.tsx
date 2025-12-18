@@ -9,6 +9,8 @@ interface Transaction {
     transactionnumber?: string;
     userId?: string;
     userid?: string;
+    userName?: string;
+    phoneNumber?: string;
     amount: number;
     timestamp: string;
 }
@@ -22,7 +24,6 @@ function AdminTransactions() {
         if (showPending) {
             void balanceClient.getPendingTransactions()
                 .then(r => {
-                    console.log('Pending transactions:', r);
                     setTransactions(r as Transaction[]);
                 })
                 .catch(error => {
@@ -31,7 +32,6 @@ function AdminTransactions() {
         } else {
             void balanceClient.getApprovedTransactions()
                 .then(r => {
-                    console.log('Approved transactions:', r);
                     setTransactions(r as Transaction[]);
                 })
                 .catch(error => {
@@ -82,8 +82,12 @@ function AdminTransactions() {
         return transaction.transactionNumber ?? transaction.transactionnumber ?? 'N/A';
     };
 
-    const getUserId = (transaction: Transaction): string => {
-        return transaction.userId ?? transaction.userid ?? 'N/A';
+    const getUsername = (transaction: Transaction): string => {
+        return transaction.userName ?? 'N/A';
+    };
+
+    const getPhoneNumber = (transaction: Transaction): string => {
+        return transaction.phoneNumber ?? 'N/A';
     };
 
     return (
@@ -108,7 +112,8 @@ function AdminTransactions() {
                     <thead>
                     <tr className="text-center bg-[#bfbfbd]">
                         <th>Transaction Number</th>
-                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Phone Number</th>
                         <th>Amount</th>
                         <th>Timestamp</th>
                     </tr>
@@ -116,7 +121,7 @@ function AdminTransactions() {
                     <tbody>
                     {transactions.length === 0 ? (
                         <tr>
-                            <td colSpan={4} className="text-center py-8 text-gray-500">
+                            <td colSpan={5} className="text-center py-8 text-gray-500">
                                 No {showPending ? 'pending' : 'approved'} transactions found
                             </td>
                         </tr>
@@ -128,7 +133,8 @@ function AdminTransactions() {
                                 onClick={(e) => showPending && handleTransactionClick(e, transaction)}
                             >
                                 <td className={showPending ? "hover:bg-base-300" : ""}>{getTransactionNumber(transaction)}</td>
-                                <td className={showPending ? "hover:bg-base-300" : ""}>{getUserId(transaction)}</td>
+                                <td className={showPending ? "hover:bg-base-300" : ""}>{getUsername(transaction)}</td>
+                                <td className={showPending ? "hover:bg-base-300" : ""}>{getPhoneNumber(transaction)}</td>
                                 <td className={showPending ? "hover:bg-base-300" : ""}>{transaction.amount} kr</td>
                                 <td className={showPending ? "hover:bg-base-300" : ""}>{formatDate(transaction.timestamp)}</td>
                             </tr>
@@ -148,8 +154,12 @@ function AdminTransactions() {
                                 <span>{getTransactionNumber(selectedTransaction)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="font-semibold">User ID:</span>
-                                <span>{getUserId(selectedTransaction)}</span>
+                                <span className="font-semibold">Username:</span>
+                                <span>{getUsername(selectedTransaction)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="font-semibold">Phone Number:</span>
+                                <span>{getPhoneNumber(selectedTransaction)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Amount:</span>
