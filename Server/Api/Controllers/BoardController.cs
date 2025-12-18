@@ -36,7 +36,7 @@ public class BoardController : ControllerBase
 			board.Repeat
 			);
 
-			return CreatedAtAction(nameof(GetBoardById), new { boardId = board.Id }, response);
+			return Ok(response); 
 		}
         catch (ArgumentException ex)
         {
@@ -233,5 +233,3 @@ public class BoardController : ControllerBase
 	
 
 }
-
-

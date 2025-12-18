@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
-import { boardClient } from "./baseUrl";
-import {useAtomValue} from "jotai";
+import { boardClient, authClient } from "./baseUrl";
+import {useAtomValue, useSetAtom} from "jotai";
 import {userInfoAtom} from "./Token.tsx";
 
 export default function PlayerNewGame() {
@@ -10,6 +10,7 @@ export default function PlayerNewGame() {
     const [loadingPrice, setLoadingPrice] = useState(false);
     const [repeat, setRepeat] = useState(false);
     const user = useAtomValue(userInfoAtom);
+    const setUser = useSetAtom(userInfoAtom);
     const [submitState, setSubmitState] = useState<{ loading: boolean; error?: string; success?: string }>({
         loading: false,
     });
@@ -82,18 +83,49 @@ export default function PlayerNewGame() {
         try {
             await boardClient.createBoard({ userId, selectedNumbers, repeat });
 
+            // Refresh user info to get updated balance
+            const updatedUser = await authClient.getUserInfo();
+            setUser(updatedUser);
+
             setSubmitState({ loading: false, success: "spilleplade købt!" });
             setToggledButtons(new Set());
             setPrice(null);
             setRepeat(false);
         } catch (err: any) {
-            const message =
-                typeof err === "string"
-                    ? err
-                    : err?.message || err?.response || "kunne ikke købe spilleplade.";
-            setSubmitState({ loading: false, error: message });
+            // Check if it's actually a success (status 201) treated as error
+            if (err?.status === 201) {
+                
+                try {
+                    const updatedUser = await authClient.getUserInfo();
+                    setUser(updatedUser);
+                } catch (refreshError) {
+                    
+                }
+                
+                setSubmitState({ loading: false, success: "spilleplade købt!" });
+                setToggledButtons(new Set());
+                setPrice(null);
+                setRepeat(false);
+                return;
+            }
+            
+            // It's a real error
+            let message = "kunne ikke købe spilleplade.";
+            
+            if (err?.response) {
+                try {
+                    const errorData = JSON.parse(err.response);
+                    message = errorData.message || errorData.title || err.response;
+                } catch {
+                    message = err.response;
+                }
+            } else if (err?.message) {
+            message = err.message;
         }
-    };
+        
+        setSubmitState({ loading: false, error: message });
+    }
+};
 
     // --- Confirm button inside modal ---
     const handleConfirmSubmit = async () => {
