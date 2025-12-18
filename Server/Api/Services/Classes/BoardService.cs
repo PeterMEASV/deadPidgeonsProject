@@ -217,15 +217,33 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
 
         return board;
     }
+    
+    public async Task<List<BoardHistoryResponseDTO>> GetBoardsForGameAsync(string gameId)
+    {
+        logger.LogInformation("Finding board for the game: {game}", gameId);
+        var boards = await context.Boards.Include(b => b.User).Where(b => b.Gameid == gameId).OrderByDescending(b => b.Winner).ToListAsync();
+        return boards.Select(b => new BoardHistoryResponseDTO(
+            b.Id,
+            b.Userid,
+            $"{b.User?.Firstname} {b.User?.Lastname}",
+            b.User?.Phonenumber ?? string.Empty,
+            b.Selectednumbers,
+            b.Timestamp,
+            b.Winner,
+            CalculateBoardPrice(b.Selectednumbers.Count),
+            b.Repeat
+        )).ToList();
+
+    }
 
     
 
     
     //helper methods for the game service class thingy
-    public Task<List<Board>> GetBoardsForGameAsync(string gameId)
+    public Task<List<Board>> GetBoardsForGame(string gameId)
     {
         logger.LogInformation("Finding board for the game: {game}", gameId);
-        return context.Boards.Where(b => b.Gameid == gameId).ToListAsync();
+        return context.Boards.Where(b => b.Gameid == gameId).OrderByDescending(b => b.Winner).ToListAsync();
     }
     
     public Task<List<Board>> GetRepeatingBoardForGameAsync(string gameId)

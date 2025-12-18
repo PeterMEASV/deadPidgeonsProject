@@ -16,6 +16,8 @@ import PlayerAddFunds from "./PlayerAddFunds.tsx";
 import { Login } from "./Login.tsx";
 import type { LoginResponseDTO } from "./generated-ts-client";
 import RequireAuth from "./RequireAuth";
+import AdminGameHistory from "./AdminGameHistory.tsx";
+import AdminBoardsForGame from "./AdminBoardsForGame.tsx";
 
 export const userAtom = atom<LoginResponseDTO | null>(null);
 export const routesAtom = atom<RouteObject[]>([
@@ -54,6 +56,14 @@ export const routesAtom = atom<RouteObject[]>([
 
           { path: 'history',
             element: <AdminHistory />
+          },
+          {
+              path: 'GameHistory',
+              element: <AdminGameHistory />
+          },
+          {
+              path: 'GameHistory/:gameId',
+              element: <AdminBoardsForGame />
           },
         ],
       },

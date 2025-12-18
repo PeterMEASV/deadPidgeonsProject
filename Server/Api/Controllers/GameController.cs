@@ -93,7 +93,7 @@ public class GameController : ControllerBase
 
     [HttpGet("history")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<object>>> GetGameHistory()
+    public async Task<ActionResult<List<GameResponseDTO>>> GetGameHistory()
     {
         try
         {

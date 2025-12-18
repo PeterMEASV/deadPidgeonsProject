@@ -658,6 +658,42 @@ export class BoardClient {
         }
         return Promise.resolve<Board>(null as any);
     }
+
+    getBoardForGame(gameId: string): Promise<BoardHistoryResponseDTO[]> {
+        let url_ = this.baseUrl + "/api/Board/BoardHistory/{gameId}";
+        if (gameId === undefined || gameId === null)
+            throw new globalThis.Error("The parameter 'gameId' must be defined.");
+        url_ = url_.replace("{gameId}", encodeURIComponent("" + gameId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetBoardForGame(_response);
+        });
+    }
+
+    protected processGetBoardForGame(response: Response): Promise<BoardHistoryResponseDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BoardHistoryResponseDTO[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardHistoryResponseDTO[]>(null as any);
+    }
 }
 
 export class GameClient {
@@ -788,7 +824,7 @@ export class GameClient {
         return Promise.resolve<FileResponse>(null as any);
     }
 
-    getGameHistory(): Promise<any[]> {
+    getGameHistory(): Promise<GameResponseDTO[]> {
         let url_ = this.baseUrl + "/api/Game/history";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -804,13 +840,13 @@ export class GameClient {
         });
     }
 
-    protected processGetGameHistory(response: Response): Promise<any[]> {
+    protected processGetGameHistory(response: Response): Promise<GameResponseDTO[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as any[];
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameResponseDTO[];
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -818,7 +854,7 @@ export class GameClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<any[]>(null as any);
+        return Promise.resolve<GameResponseDTO[]>(null as any);
     }
 
     getGameById(gameId: string): Promise<FileResponse> {
@@ -1413,8 +1449,30 @@ export interface ValidateBoardDTO {
     selectedNumbers?: number[];
 }
 
+export interface BoardHistoryResponseDTO {
+    id?: string;
+    userId?: string;
+    userName?: string;
+    userPhone?: string;
+    selectedNumbers?: number[];
+    timestamp?: string;
+    winner?: boolean;
+    price?: number;
+    repeat?: boolean;
+}
+
 export interface DrawWinningNumbersDTO {
     winningNumbers?: number[];
+}
+
+export interface GameResponseDTO {
+    id?: string;
+    weeknumber?: string;
+    winningNumbers?: number[];
+    drawDate?: string;
+    isActive?: boolean;
+    totalBoards?: number;
+    totalWinners?: number;
 }
 
 export interface Historylog {

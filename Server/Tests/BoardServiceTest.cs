@@ -50,7 +50,7 @@ public class BoardServiceTest(IBoardService boardService, IGameService gameServi
     {
         User testUser = await CreateTestUser();
         await gameService.CreateGameAsync();
-        var boardDTO = new CreateBoardDTO(testUser.Id, [2, 5, 1, 9, 12], null);
+        var boardDTO = new CreateBoardDTO(testUser.Id, [2, 5, 1, 9, 12], false);
         
         await boardService.CreateBoardAsync(boardDTO);
         

@@ -38,7 +38,7 @@ export default function PlayerAddFunds() {
             await balanceClient.submitDeposit({
                 userId: user.id,
                 amount: amount,
-                transactionnumber: transactionNumber,
+                transactionNumber: transactionNumber,
             });
 
             setState({

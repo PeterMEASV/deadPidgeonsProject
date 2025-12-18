@@ -22,6 +22,18 @@ public record BoardResponseDTO(
     Boolean repeat
 );
 
+public record BoardHistoryResponseDTO(
+    string Id,
+    string UserId,
+    string UserName,
+    string UserPhone,
+    List<int> SelectedNumbers,
+    DateTime Timestamp,
+    bool Winner,
+    decimal Price,
+    Boolean repeat
+);
+
 public record ValidateBoardDTO(
     List<int> SelectedNumbers
 );

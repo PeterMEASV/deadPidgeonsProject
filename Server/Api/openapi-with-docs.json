@@ -516,6 +516,40 @@
         }
       }
     },
+    "/api/Board/BoardHistory/{gameId}": {
+      "get": {
+        "tags": [
+          "Board"
+        ],
+        "operationId": "Board_GetBoardForGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BoardHistoryResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Game/create": {
       "post": {
         "tags": [
@@ -604,7 +638,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {}
+                  "items": {
+                    "$ref": "#/components/schemas/GameResponseDTO"
+                  }
                 }
               }
             }
@@ -1376,6 +1412,45 @@
           }
         }
       },
+      "BoardHistoryResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userPhone": {
+            "type": "string"
+          },
+          "selectedNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "winner": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "repeat": {
+            "type": "boolean"
+          }
+        }
+      },
       "DrawWinningNumbersDTO": {
         "type": "object",
         "additionalProperties": false,
@@ -1386,6 +1461,40 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "GameResponseDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "weeknumber": {
+            "type": "string"
+          },
+          "winningNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "drawDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "totalBoards": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWinners": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

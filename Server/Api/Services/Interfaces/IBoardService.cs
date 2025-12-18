@@ -14,4 +14,5 @@ public interface IBoardService
     Task<object> ValidateBoardAsync(List<int> selectedNumbers);
     decimal CalculateBoardPrice(int numberOfFields);
     Task<Board> ToggleRepeatForBoardAsync(string boardId, bool repeat);
+    Task<List<BoardHistoryResponseDTO>> GetBoardsForGameAsync(string gameId);
 }

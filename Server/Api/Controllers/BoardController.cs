@@ -214,6 +214,22 @@ public class BoardController : ControllerBase
 		}
 		
 	}
+
+	[HttpGet("BoardHistory/{gameId}")]
+	public async Task<ActionResult<List<BoardHistoryResponseDTO>>> GetBoardForGame(string gameId)
+	{
+		try
+		{
+			var boards = await _boardService.GetBoardsForGameAsync(gameId);
+
+			return Ok(boards);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting board history for game {GameId}", gameId);
+			return StatusCode(500, "An error occurred while getting the board history");
+		}
+	}
 	
 
 }

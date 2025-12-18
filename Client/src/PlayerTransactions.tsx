@@ -28,10 +28,12 @@ export default function PlayerTransactions() {
             return;
         }
 
+        const userId = user.id;
+
         const fetchTransactions = async () => {
             try {
                 // SAME PATTERN AS PlayerGame
-                const result = await balanceClient.getUserTransactions(user.id);
+                const result = await balanceClient.getUserTransactions(userId);
                 setTransactions(result);
             } catch (err) {
                 setError("Kunne ikke hente dine transaktioner.");

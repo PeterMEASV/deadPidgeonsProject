@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { historyClient } from "./baseUrl";
 import type { Historylog } from "./generated-ts-client";
 
 function AdminHistory() {
+  const navigate = useNavigate();
   const [logs, setLogs] = useState<Historylog[]>([]);
 
   useEffect(() => {
@@ -18,7 +20,16 @@ function AdminHistory() {
 
   return (
     <>
-      <div className="overflow-x-auto mt-6">
+      <div className="flex justify-center gap-3 mt-6 mb-4">
+        <button
+          className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]"
+          onClick={() => navigate('/admin/GameHistory')}
+        >
+          Game History
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
         <table className="table">
           <thead>
             <tr className="text-center bg-[#bfbfbd]">
