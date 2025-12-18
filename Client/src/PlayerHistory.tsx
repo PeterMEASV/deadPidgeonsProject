@@ -31,7 +31,6 @@ export default function PlayerHistory() {
             .getUserBoardHistory(user.id)
             .then(r => {
                 setHistory(r);
-                console.log('History:', r);
             })
             .catch(() => {
                 setError("Kunne ikke hente spilhistorik.");
