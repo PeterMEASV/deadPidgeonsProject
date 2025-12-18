@@ -76,7 +76,7 @@ public class GameServiceTest(
             user.Id,
             new List<int> { 1, 2, 3, 4, 5 },
             false
-        ));
+        ),true);
 
         var dto = new DrawWinningNumbersDTO(new List<int> { 1, 2, 3 });
 
@@ -98,7 +98,7 @@ public class GameServiceTest(
             user.Id,
             new List<int> { 10, 11, 12, 13, 14 },
             false
-        ));
+        ),true);
 
         var dto = new DrawWinningNumbersDTO(new List<int> { 1, 2, 3 });
 
