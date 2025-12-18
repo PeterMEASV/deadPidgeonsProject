@@ -6,7 +6,7 @@ import { historyClient } from "./baseUrl";
 interface BoardHistoryDTO {
     boardId: string;
     selectedNumbers: number[];
-    weekNumber: string;
+    weeknumber: string;
     winner: boolean;
     winningNumbers?: number[];
     drawDate: string;
@@ -31,6 +31,7 @@ export default function PlayerHistory() {
             .getUserBoardHistory(user.id)
             .then(r => {
                 setHistory(r);
+                console.log('History:', r);
             })
             .catch(() => {
                 setError("Kunne ikke hente spilhistorik.");
@@ -81,7 +82,7 @@ export default function PlayerHistory() {
                             >
                                 <td>{h.boardId.slice(0, 8)}</td>
                                 <td>{h.selectedNumbers.join(", ")}</td>
-                                <td>{h.weekNumber || "N/A"}</td>
+                                <td>{h.weeknumber || "N/A"}</td>
 
                                 <td
                                     className={
