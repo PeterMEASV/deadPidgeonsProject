@@ -19,6 +19,8 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
         };
     }
     
+    
+    //todo hvorfor ikke bare bruge async? hvorfor har vi 2?
     private bool ValidateBoard(List<int>? selectedNumbers, out string errorMessage)
     {
         errorMessage = string.Empty;
@@ -81,18 +83,13 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
 
         // MATH!!
         decimal boardPrice = CalculateBoardPrice(dto.SelectedNumbers.Count);
-        int priceMultiplier = dto.RepeatForWeeks ?? 0;
 
-        decimal totalPrice = boardPrice * (priceMultiplier+1);
-
-        if (user.Balance < totalPrice)
+        if (user.Balance < boardPrice)
         {
             throw new InvalidOperationException("Insufficient funds.");
         }
+        
 
-        var createdBoards = new List<Board>();
-        for (int i = 0; i < dto.RepeatForWeeks; i++)
-        {
             var board = new Board
             {
                 Id = Guid.NewGuid().ToString(),
@@ -100,22 +97,21 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
                 Selectednumbers = new List<int>(dto.SelectedNumbers),
                 Timestamp = DateTime.Now,
                 Winner = false,
-                Gameid = currentGame.Id
+                Gameid = currentGame.Id,
+                Repeat = dto.Repeat
             };
             
             context.Boards.Add(board);
-            createdBoards.Add(board);
-        }
 
-        user.Balance -= totalPrice;
+        user.Balance -= boardPrice;
 
         await context.SaveChangesAsync();
         
-        logger.LogInformation("Created {Count} boards for user {UserId}. Total was {Total} DKK",
-            dto.RepeatForWeeks, dto.UserId, totalPrice);
-        await historyService.CreateLog("Successfully created new board(s) (ID: " + createdBoards.First().Id + ", Total: " + totalPrice + " DKK)");
+        logger.LogInformation("Created board for user {UserId}. Total was {Total} DKK",
+            dto.UserId, boardPrice);
+        await historyService.CreateLog("Successfully created new board (ID: " + board.Id + ", Total: " + boardPrice + " DKK)");
 
-        return createdBoards.First();
+        return board;
     }
 
     public async Task<List<Board>> GetBoardsByUserAsync(string userId)
@@ -161,7 +157,7 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
             throw new KeyNotFoundException("User not found");
         }
         
-        // Refund
+        // Refund TODO: ???????
         decimal refundAmount = CalculateBoardPrice(board.Selectednumbers.Count);
         user.Balance += refundAmount;
 
@@ -190,5 +186,17 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
             Price = price, 
             NumberOfFields = selectedNumbers.Count
         });
+    }
+
+    public Task<List<Board>> GetBoardsForGameAsync(string gameId)
+    {
+        logger.LogInformation("Finding board for the game: {game}", gameId);
+        return context.Boards.Where(b => b.Gameid == gameId).ToListAsync();
+    }
+    
+    public Task<List<Board>> GetRepeatingBoardForGameAsync(string gameId)
+    {
+        logger.LogInformation("Finding repeating board for the game: {game}", gameId);
+        return context.Boards.Where(b => b.Gameid == gameId && b.Repeat).ToListAsync();
     }
 }

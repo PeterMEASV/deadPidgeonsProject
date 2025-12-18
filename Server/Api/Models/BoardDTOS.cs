@@ -8,8 +8,7 @@ public record CreateBoardDTO(
     [Required]
     [Length(5,8)]
     List<int> SelectedNumbers,
-    [Range(1,10)]
-    int? RepeatForWeeks
+    Boolean Repeat
 );
 
 //kun sendes til client, ingen brug for validation.

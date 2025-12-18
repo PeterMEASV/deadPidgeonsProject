@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Api.Services.Classes;
 
-public class GameService(MyDbContext context, ILogger<GameService> logger, IHistoryService historyService) : IGameService
+public class GameService(MyDbContext context, ILogger<GameService> logger, IHistoryService historyService, IBoardService boardService) : IGameService
 {
     public async Task<Game> CreateGameAsync()
     {
@@ -14,23 +14,22 @@ public class GameService(MyDbContext context, ILogger<GameService> logger, IHist
         logger.LogInformation("Creating new game for the Week");
 
         // Deactivate any active games
-        var activeGames = await context.Games
-            .Where(g => g.Isactive)
-            .ToListAsync();
+        var activeGame = await context.Games
+            .Include(g => g.Boards)
+            .FirstOrDefaultAsync(g => g.Isactive);
 
-        foreach (var game in activeGames)
-        {
-            if (!int.TryParse(game.Weeknumber, out var currentWeekNumber))
+
+            if (!int.TryParse(activeGame.Weeknumber, out var currentWeekNumber))
             {
                 throw new InvalidOperationException(
-                    $"Active game's Weeknumber ('{game.Weeknumber}') is not a valid integer, cannot increment."
+                    $"Active game's Weeknumber ('{activeGame.Weeknumber}') is not a valid integer, cannot increment."
                 );
             }
 
             nextWeekNumber = (currentWeekNumber + 1).ToString();
-            game.Isactive = false;
-            logger.LogInformation("Deactivated game {GameId}", game.Id);
-        }
+            activeGame.Isactive = false;
+            logger.LogInformation("Deactivated game {GameId}", activeGame.Id);
+        
 
         // Its Creating time
         var newGame = new Game
@@ -49,6 +48,19 @@ public class GameService(MyDbContext context, ILogger<GameService> logger, IHist
         logger.LogInformation("Created new game {GameId} for Week {WeekNumber}", newGame.Id, newGame.Weeknumber);
         await historyService.CreateLog("Successfully created new game (ID: " + newGame.Id + ", Week: " + newGame.Weeknumber + ")");
 
+        var boardsToRepeat = activeGame.Boards.Where(b => b.Repeat).ToList();
+        foreach (var repeatingBoard in boardsToRepeat)
+        {
+            var newBoard = new CreateBoardDTO
+            (
+               repeatingBoard.Userid,
+                repeatingBoard.Selectednumbers,
+                true
+            );
+            
+            await boardService.CreateBoardAsync(newBoard);
+        }
+        
         return newGame;
     }
 

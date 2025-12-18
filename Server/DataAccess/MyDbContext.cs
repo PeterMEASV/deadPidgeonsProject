@@ -56,6 +56,9 @@ public partial class MyDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Gameid).HasColumnName("gameid");
+            entity.Property(e => e.Repeat)
+                .HasDefaultValue(false)
+                .HasColumnName("repeat");
             entity.Property(e => e.Selectednumbers).HasColumnName("selectednumbers");
             entity.Property(e => e.Timestamp)
                 .HasColumnType("timestamp without time zone")

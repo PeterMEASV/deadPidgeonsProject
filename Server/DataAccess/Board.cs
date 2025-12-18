@@ -17,6 +17,8 @@ public partial class Board
 
     public string? Gameid { get; set; }
 
+    public bool Repeat { get; set; }
+
     public virtual Game? Game { get; set; }
 
     public virtual User User { get; set; } = null!;
