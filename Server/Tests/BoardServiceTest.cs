@@ -44,4 +44,88 @@ public class BoardServiceTest(IBoardService boardService, IGameService gameServi
         Assert.Throws<ArgumentException>(() => boardService.CalculateBoardPrice(9));
         Assert.Throws<ArgumentException>(() => boardService.CalculateBoardPrice(0));
     }
+
+    [Fact]
+    public async Task CreateBoard_ValidData()
+    {
+        User testUser = await CreateTestUser();
+        await gameService.CreateGameAsync();
+        
+        var board = await boardService.CreateBoardAsync(new CreateBoardDTO(testUser.Id, new List<int> { 1, 2, 3, 4, 5 }, false), true);
+        
+        Assert.NotNull(board);
+        var allBoards = await boardService.GetAllBoardsAsync();
+        Assert.Single(allBoards);
+        
+        var updatedUser = await context.Users.FindAsync(testUser.Id);
+        Assert.Equal(99979m, updatedUser.Balance);
+    }
+
+    [Fact]
+    public async Task CreateBoard_InsufficientFunds()
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid().ToString(),
+            Email = "poor@test.com",
+            Phonenumber = "12345678",
+            Balance = 5m,
+            Isactive = true,
+            Password = "hashed",
+            Firstname = "Poor",
+            Lastname = "User"
+        };
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        await gameService.CreateGameAsync();
+
+        var dto = new CreateBoardDTO(user.Id, new List<int> { 1, 2, 3, 4, 5 }, false);
+        
+        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            boardService.CreateBoardAsync(dto, true));
+    }
+
+    [Fact]
+    public async Task CreateBoard_InvalidNumbers()
+    {
+        User testUser = await CreateTestUser();
+        await gameService.CreateGameAsync();
+
+        // Too few numbers
+        var dto = new CreateBoardDTO(testUser.Id, new List<int> { 1, 2, 3 }, false);
+        await Assert.ThrowsAsync<ArgumentException>(() => boardService.CreateBoardAsync(dto, true));
+
+        // Duplicate numbers
+        var dto2 = new CreateBoardDTO(testUser.Id, new List<int> { 1, 1, 2, 3, 4 }, false);
+        await Assert.ThrowsAsync<ArgumentException>(() => boardService.CreateBoardAsync(dto2, true));
+
+        // Numbers out of range
+        var dto3 = new CreateBoardDTO(testUser.Id, new List<int> { 1, 2, 3, 4, 99 }, false);
+        await Assert.ThrowsAsync<ArgumentException>(() => boardService.CreateBoardAsync(dto3, true));
+    }
+
+    [Fact]
+    public async Task CreateBoard_NoActiveGame()
+    {
+        User testUser = await CreateTestUser();
+
+        var dto = new CreateBoardDTO(testUser.Id, new List<int> { 1, 2, 3, 4, 5 }, false);
+        
+        await Assert.ThrowsAsync<InvalidOperationException>(() => boardService.CreateBoardAsync(dto, true));
+    }
+
+    [Fact]
+    public async Task ToggleRepeat_UpdatesStatus()
+    {
+        User testUser = await CreateTestUser();
+        await gameService.CreateGameAsync();
+        var board = await boardService.CreateBoardAsync(new CreateBoardDTO(testUser.Id, new List<int> { 1, 2, 3, 4, 5 }, false), true);
+        
+        Assert.False(board.Repeat);
+        
+        await boardService.ToggleRepeatForBoardAsync(board.Id, true);
+        var updatedBoard = await boardService.GetBoardByIdAsync(board.Id);
+        
+        Assert.True(updatedBoard.Repeat);
+    }
 }

@@ -76,7 +76,7 @@ public class GameServiceTest(
             user.Id,
             new List<int> { 1, 2, 3, 4, 5 },
             false
-        ));
+        ), true);
 
         var dto = new DrawWinningNumbersDTO(new List<int> { 1, 2, 3 });
 
@@ -89,7 +89,7 @@ public class GameServiceTest(
     }
 
     [Fact]
-    public async Task DrawWinningNumbers_NoMatch_SetsLoser()
+    public async Task DrawWinningNumbers_NoMatch()
     {
         var user = await CreateTestUser();
         await gameService.CreateGameAsync();
@@ -98,7 +98,7 @@ public class GameServiceTest(
             user.Id,
             new List<int> { 10, 11, 12, 13, 14 },
             false
-        ));
+        ), true);
 
         var dto = new DrawWinningNumbersDTO(new List<int> { 1, 2, 3 });
 
@@ -112,7 +112,7 @@ public class GameServiceTest(
     // ---------------------------
 
     [Fact]
-    public async Task DrawWinningNumbers_InvalidCount_ThrowsException()
+    public async Task DrawWinningNumbers_InvalidCount()
     {
         await gameService.CreateGameAsync();
 
@@ -124,7 +124,7 @@ public class GameServiceTest(
     }
 
     [Fact]
-    public async Task DrawWinningNumbers_DuplicateNumbers_ThrowsException()
+    public async Task DrawWinningNumbers_DuplicateNumbers()
     {
         await gameService.CreateGameAsync();
 
@@ -136,7 +136,7 @@ public class GameServiceTest(
     }
 
     [Fact]
-    public async Task DrawWinningNumbers_Twice_ThrowsException()
+    public async Task DrawWinningNumbers_Twice()
     {
         await gameService.CreateGameAsync();
 

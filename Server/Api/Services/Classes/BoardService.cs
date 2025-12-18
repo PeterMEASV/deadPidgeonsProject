@@ -166,6 +166,7 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
 
     public async Task<bool> DeleteBoardAsync(string boardId)
     {
+        // unused but kept in case where it's required.
         logger.LogInformation("Deleting board {BoardId}", boardId);
         
         var board = await context.Boards.FindAsync(boardId);
@@ -180,7 +181,6 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
             throw new KeyNotFoundException("User not found");
         }
         
-        // Refund TODO: ???????
         decimal refundAmount = CalculateBoardPrice(board.Selectednumbers.Count);
         user.Balance += refundAmount;
 
