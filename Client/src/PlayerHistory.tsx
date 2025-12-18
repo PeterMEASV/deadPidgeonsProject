@@ -2,16 +2,7 @@
 import { useAtomValue } from "jotai";
 import { userInfoAtom } from "./Token.tsx";
 import { historyClient } from "./baseUrl";
-
-interface BoardHistoryDTO {
-    boardId: string;
-    selectedNumbers: number[];
-    weeknumber: string;
-    winner: boolean;
-    winningNumbers?: number[];
-    drawDate: string;
-}
-
+import type {BoardHistoryDTO} from "./generated-ts-client";
 
 export default function PlayerHistory() {
     const user = useAtomValue(userInfoAtom);
@@ -79,8 +70,8 @@ export default function PlayerHistory() {
                                     index % 2 !== 0 ? "bg-[#bfbfbd]" : ""
                                 }`}
                             >
-                                <td>{h.boardId.slice(0, 8)}</td>
-                                <td>{h.selectedNumbers.join(", ")}</td>
+                                <td>{h.boardId?.slice(0, 8)}</td>
+                                <td>{h.selectedNumbers?.join(", ")}</td>
                                 <td>{h.weeknumber || "N/A"}</td>
 
                                 <td
