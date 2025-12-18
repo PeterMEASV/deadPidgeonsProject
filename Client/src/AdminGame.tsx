@@ -22,12 +22,11 @@ function AdminGame() {
         setShowConfirmation(true);
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         console.log('Game ended');
         setShowConfirmation(false);
         const toggledNumbers = Array.from(toggledButtons).map((i) => i + 1);
-        console.log(gameClient.drawWinningNumbers({ winningNumbers: toggledNumbers }));
-        console.log(gameClient.createGame());
+        console.log(gameClient.createGame({ winningNumbers: toggledNumbers }));
     };
 
     const handleCancel = () => {

@@ -8,6 +8,7 @@ export default function PlayerNewGame() {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [price, setPrice] = useState<number | null>(null);
     const [loadingPrice, setLoadingPrice] = useState(false);
+    const [repeat, setRepeat] = useState(false);
     const user = useAtomValue(userInfoAtom);
     const [submitState, setSubmitState] = useState<{ loading: boolean; error?: string; success?: string }>({
         loading: false,
@@ -72,25 +73,19 @@ export default function PlayerNewGame() {
             return;
         }
 
-const userId = user?.id;
-if (!userId) {
-  setSubmitState({ loading: false, error: "Du er ikke logget ind." });
-  return;
-}
+        const userId = user?.id;
+        if (!userId) {
+            setSubmitState({ loading: false, error: "Du er ikke logget ind." });
+            return;
+        }
 
         try {
-            const payload = {
-                userId: user.id,
-                selectedNumbers,
-                repeatForWeeks: 1
-            };
-            console.log(payload);
-            // safe: userId is string here
-            await boardClient.createBoard({ userId, selectedNumbers, repeatForWeeks: 1 });
+            await boardClient.createBoard({ userId, selectedNumbers, repeat });
 
             setSubmitState({ loading: false, success: "spilleplade købt!" });
             setToggledButtons(new Set());
             setPrice(null);
+            setRepeat(false);
         } catch (err: any) {
             const message =
                 typeof err === "string"
@@ -141,7 +136,24 @@ if (!userId) {
                 ))}
             </div>
 
-            <div className="flex justify-center mt-6 mb-4">
+            <div className="flex flex-col items-center gap-4 mt-6 mb-4">
+                <div className="form-control">
+                    <label className="label cursor-pointer gap-4">
+                        <span className="label-text text-lg font-semibold">Gentag hver uge?</span>
+                        <input
+                            type="checkbox"
+                            className={`checkbox checkbox-lg border-2 border-gray-400 ${repeat ? 'bg-[#E50006FF] border-[#E50006FF]' : ''}`}
+                            style={{ 
+                                borderRadius: '4px',
+                                transition: 'all 0.2s',
+                                color: 'white'
+                            }}
+                            checked={repeat}
+                            onChange={(e) => setRepeat(e.target.checked)}
+                        />
+                    </label>
+                </div>
+
                 <button
                     className="btn bg-[#E50006FF] text-white text-xl px-8 py-4 h-auto hover:bg-[#AF0006FF]"
                     disabled={selectionCount < 5 || selectionCount > 8}
@@ -168,6 +180,11 @@ if (!userId) {
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <h2 className="text-xl font-bold mb-4">bekræft køb</h2>
                         <p>spillepladen koster {price} DKK. fortsæt?</p>
+                        {repeat && (
+                            <p className="text-sm text-gray-600 mt-2 italic font-medium">
+                                * Denne plade vil blive gentaget automatisk hver uge.
+                            </p>
+                        )}
 
                         <div className="flex justify-end gap-4 mt-4">
                             <button className="btn btn-ghost px-6 py-3" onClick={handleCancel}>

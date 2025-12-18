@@ -10,47 +10,52 @@ public class GameService(MyDbContext context, ILogger<GameService> logger, IHist
 {
     public async Task<Game> CreateGameAsync()
     {
-        var nextWeekNumber = "1";
-        logger.LogInformation("Creating new game for the Week");
+        //tilføjet transactions for at fixe selectednumber komme på nye spil.
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var nextWeekNumber = "1";
+            logger.LogInformation("Creating new game for the Week");
 
-        // Deactivate any active games
-        var activeGame = await context.Games
-            .Include(g => g.Boards)
-            .FirstOrDefaultAsync(g => g.Isactive);
+            // Deactivate any active games
+            var activeGame = await context.Games
+                .Include(g => g.Boards)
+                .FirstOrDefaultAsync(g => g.Isactive);
 
-
-            if (!int.TryParse(activeGame.Weeknumber, out var currentWeekNumber))
+            if (activeGame != null)
             {
-                throw new InvalidOperationException(
-                    $"Active game's Weeknumber ('{activeGame.Weeknumber}') is not a valid integer, cannot increment."
-                );
+                if (!int.TryParse(activeGame.Weeknumber, out var currentWeekNumber))
+                {
+                    throw new InvalidOperationException(
+                        $"Active game's Weeknumber ('{activeGame.Weeknumber}') is not a valid integer, cannot increment."
+                    );
+                }
+
+                nextWeekNumber = (currentWeekNumber + 1).ToString();
+                activeGame.Isactive = false;
+                logger.LogInformation("Deactivated game {GameId}", activeGame.Id);
             }
 
-            nextWeekNumber = (currentWeekNumber + 1).ToString();
-            activeGame.Isactive = false;
-            logger.LogInformation("Deactivated game {GameId}", activeGame.Id);
-        
+            // Its Creating time
+            var newGame = new Game
+            {
+                Id = Guid.NewGuid().ToString(),
+                Weeknumber = nextWeekNumber,
+                Winningnumbers = new List<int>(),
+                Drawdate = DateTime.Now,
+                Isactive = true,
+                Timestamp = DateTime.Now
+            };
 
-        // Its Creating time
-        var newGame = new Game
-        {
-            Id = Guid.NewGuid().ToString(),
-            Weeknumber = nextWeekNumber,
-            Winningnumbers = new List<int>(),
-            Drawdate = DateTime.Now,
-            Isactive = true,
-            Timestamp = DateTime.Now
-        };
-
-        context.Games.Add(newGame);
-        await context.SaveChangesAsync();
-
-        logger.LogInformation("Created new game {GameId} for Week {WeekNumber}", newGame.Id, newGame.Weeknumber);
-        await historyService.CreateLog("Successfully created new game (ID: " + newGame.Id + ", Week: " + newGame.Weeknumber + ")");
-
-        var boardsToRepeat = activeGame.Boards.Where(b => b.Repeat).ToList();
-        foreach (var repeatingBoard in boardsToRepeat)
-        {
+            context.Games.Add(newGame);
+            await context.SaveChangesAsync();
+            
+            
+            if (activeGame != null)
+            {
+                var boardsToRepeat = activeGame.Boards.Where(b => b.Repeat).ToList();
+                foreach (var repeatingBoard in boardsToRepeat)
+                {
             var newBoard = new CreateBoardDTO
             (
                repeatingBoard.Userid,
@@ -58,10 +63,22 @@ public class GameService(MyDbContext context, ILogger<GameService> logger, IHist
                 true
             );
             
-            await boardService.CreateBoardAsync(newBoard);
+                    await boardService.CreateBoardAsync(newBoard);
+                }
+            }
+
+            await transaction.CommitAsync();
+            
+            logger.LogInformation("Created new game {GameId} for Week {WeekNumber}", newGame.Id, newGame.Weeknumber);
+            await historyService.CreateLog("Successfully created new game (ID: " + newGame.Id + ", Week: " + newGame.Weeknumber + ")");
+
+            return newGame;
         }
-        
-        return newGame;
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<Game?> GetCurrentGameAsync()

@@ -32,7 +32,9 @@ public class BoardController : ControllerBase
 			board.Selectednumbers,
 			board.Timestamp,
 			board.Winner,
-			_boardService.CalculateBoardPrice(board.Selectednumbers.Count));
+			_boardService.CalculateBoardPrice(board.Selectednumbers.Count),
+			board.Repeat
+			);
 
 			return CreatedAtAction(nameof(GetBoardById), new { boardId = board.Id }, response);
 		}
@@ -68,7 +70,8 @@ public class BoardController : ControllerBase
                 b.Selectednumbers,
                 b.Timestamp,
                 b.Winner,
-                _boardService.CalculateBoardPrice(b.Selectednumbers.Count)
+                _boardService.CalculateBoardPrice(b.Selectednumbers.Count),
+                b.Repeat
             )).ToList();
 
             return Ok(response);
@@ -79,6 +82,32 @@ public class BoardController : ControllerBase
             return StatusCode(500, "An error occurred while getting boards");
         }
     }
+
+	[HttpGet("userActive/{userId}")]
+	public async Task<ActionResult<List<BoardResponseDTO>>> GetActiveBoardsByUser(string userId)
+	{
+		try
+		{
+			var boards = await _boardService.GetActiveBoardsByUserAsync(userId);
+
+			var response = boards.Select(b => new BoardResponseDTO(
+				b.Id,
+				b.Userid,
+				b.Selectednumbers,
+				b.Timestamp,
+				b.Winner,
+				_boardService.CalculateBoardPrice(b.Selectednumbers.Count),
+				b.Repeat
+			)).ToList();
+
+			return Ok(response);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting active boards for user {UserId}", userId);
+			return StatusCode(500, "An error occurred while getting active boards");
+		}
+	}
 
 	[HttpGet("all")]
 	[Authorize(Roles = "Admin")]
@@ -94,7 +123,8 @@ public class BoardController : ControllerBase
                 b.Selectednumbers,
                 b.Timestamp,
                 b.Winner,
-                _boardService.CalculateBoardPrice(b.Selectednumbers.Count)
+                _boardService.CalculateBoardPrice(b.Selectednumbers.Count),
+                b.Repeat
             )).ToList();
 
             return Ok(response);
@@ -123,7 +153,8 @@ public class BoardController : ControllerBase
                 board.Selectednumbers,
                 board.Timestamp,
                 board.Winner,
-                _boardService.CalculateBoardPrice(board.Selectednumbers.Count));
+                _boardService.CalculateBoardPrice(board.Selectednumbers.Count),
+                board.Repeat);
 
             return Ok(response);
 		}
@@ -167,6 +198,23 @@ public class BoardController : ControllerBase
             return StatusCode(500, "An error occurred while validating the board");
         }
     }
+
+	[HttpPatch("toggleRepeat/{boardId}")]
+	public async Task<ActionResult<Board>> ToggleRepeatForBoard([FromBody] string boardId, bool repeat)
+	{
+		try
+		{
+			var board = await _boardService.ToggleRepeatForBoardAsync(boardId, repeat);
+			return Ok(board);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error toggling repeat for board {BoardId}", boardId);
+			return StatusCode(500, "An error occurred while toggling repeat");
+		}
+		
+	}
+	
 
 }
 

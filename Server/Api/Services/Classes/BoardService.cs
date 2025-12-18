@@ -123,6 +123,18 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
             .OrderByDescending(b => b.Timestamp)
             .ToListAsync();
     }
+    
+    public async Task<List<Board>> GetActiveBoardsByUserAsync(string userId)
+    {
+        logger.LogInformation("Getting active boards for user {UserId}", userId);
+
+        return await context.Boards
+            .Include(b => b.Game)
+            .Where(b => b.Userid == userId && b.Game.Isactive)
+            .OrderByDescending(b => b.Timestamp)
+            .ToListAsync();
+    }
+
 
     public async Task<List<Board>> GetAllBoardsAsync()
     {
@@ -188,6 +200,28 @@ public class BoardService(MyDbContext context, ILogger<BoardService> logger, IHi
         });
     }
 
+    public async Task<Board> ToggleRepeatForBoardAsync(string boardId, bool repeat)
+    {
+        logger.LogInformation("Setting repeat for board {BoardId} to {Repeat}", boardId, repeat);
+        var board = await context.Boards.FindAsync(boardId);
+        if (board == null)
+        {
+            throw new KeyNotFoundException("Board not found");
+        }
+
+        board.Repeat = repeat;
+        await context.SaveChangesAsync();
+        logger.LogInformation("Successfully updated repeat status for board {BoardId} to {Status}", 
+            boardId, board.Repeat);
+        await historyService.CreateLog($"Successfully updated board repeat (ID: {boardId}, Status: {board.Repeat})");
+
+        return board;
+    }
+
+    
+
+    
+    //helper methods for the game service class thingy
     public Task<List<Board>> GetBoardsForGameAsync(string gameId)
     {
         logger.LogInformation("Finding board for the game: {game}", gameId);

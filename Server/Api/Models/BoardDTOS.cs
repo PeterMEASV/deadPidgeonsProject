@@ -18,7 +18,8 @@ public record BoardResponseDTO(
     List<int> SelectedNumbers,
     DateTime Timestamp,
     bool Winner,
-    decimal Price
+    decimal Price,
+    Boolean repeat
 );
 
 public record ValidateBoardDTO(

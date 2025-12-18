@@ -10,6 +10,7 @@ interface PlayerBoard {
   selectedNumbers: number[];
   price: number;
   timestamp: string;
+  repeat: boolean;
 }
 
 const toPlayerBoard = (dto: BoardResponseDTO): PlayerBoard | null => {
@@ -20,6 +21,7 @@ const toPlayerBoard = (dto: BoardResponseDTO): PlayerBoard | null => {
     selectedNumbers: dto.selectedNumbers ?? [],
     price: dto.price ?? 0,
     timestamp: dto.timestamp ?? "",
+    repeat: dto.repeat ?? false,
   };
 };
 
@@ -42,7 +44,7 @@ export default function PlayerGame() {
 
     const fetchBoards = async () => {
       try {
-        const result = await boardClient.getBoardsByUser(userId);
+        const result = await boardClient.getActiveBoardsByUser(userId);
 
         const mapped = result
           .map(toPlayerBoard)
@@ -59,10 +61,25 @@ export default function PlayerGame() {
     void fetchBoards();
   }, [user?.id]);
 
+  const handleToggleRepeat = async (boardId: string, currentRepeat: boolean) => {
+    try {
+      const newRepeatStatus = !currentRepeat;
+      
+      // The API takes (repeat, idPath, idBody) based on your generated client
+      await boardClient.toggleRepeatForBoard(newRepeatStatus, boardId, boardId);
+      
+      setBoards(prev => 
+        prev.map(b => b.id === boardId ? { ...b, repeat: newRepeatStatus } : b)
+      );
+    } catch (err) {
+      console.error("Failed to toggle repeat status", err);
+      alert("Kunne ikke ændre gentagelsesstatus.");
+    }
+  };
+
   return (
     <div className="p-6">
-
-            {/* HEADER */}
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">dine spil</h1>
 
@@ -85,13 +102,14 @@ export default function PlayerGame() {
               <th>Numbers</th>
               <th>Price</th>
               <th>Created</th>
+              <th>Gentag</th>
             </tr>
           </thead>
 
           <tbody>
             {boards.length === 0 && !loading ? (
               <tr>
-                <td colSpan={4} className="text-center py-8 text-gray-500">
+                <td colSpan={5} className="text-center py-8 text-gray-500">
                   du har ingen igangværende spilleplader
                 </td>
               </tr>
@@ -104,7 +122,20 @@ export default function PlayerGame() {
                   <td>{board.id.slice(0, 8)}</td>
                   <td>{board.selectedNumbers.join(", ")}</td>
                   <td>{board.price} DKK</td>
-                                <td>{new Date(board.timestamp).toLocaleString("da-DK")}</td>
+                  <td>{new Date(board.timestamp).toLocaleString("da-DK")}</td>
+                  <td>
+                    <input
+                        type="checkbox"
+                        className={`checkbox checkbox-lg border-2 border-gray-400 ${board.repeat ? 'bg-[#E50006FF] border-[#E50006FF]' : ''}`}
+                        style={{
+                            borderRadius: '4px',
+                            transition: 'all 0.2s',
+                            color: 'white'
+                        }}
+                      checked={board.repeat}
+                      onChange={() => handleToggleRepeat(board.id, board.repeat)}
+                    />
+                  </td>
                 </tr>
               ))
             )}

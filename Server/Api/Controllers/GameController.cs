@@ -20,10 +20,11 @@ public class GameController : ControllerBase
     
     [HttpPost("create")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<object>> CreateGame()
+    public async Task<ActionResult<object>> CreateGame([FromBody] DrawWinningNumbersDTO dto)
     {
         try
         {
+            await _gameService.DrawWinningNumbersAsync(dto);
             var game = await _gameService.CreateGameAsync();
 
             return Ok(new
@@ -87,48 +88,6 @@ public class GameController : ControllerBase
         {
             _logger.LogError(ex, "Error getting current game details");
             return StatusCode(500, "An error occurred while getting game details");
-        }
-    }
-    
-    [HttpPost("draw")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<object>> DrawWinningNumbers([FromBody] DrawWinningNumbersDTO dto)
-    {
-        try
-        {
-            var game = await _gameService.DrawWinningNumbersAsync(dto);
-
-            var winningBoards = game.Boards.Where(b => b.Winner).ToList();
-
-            return Ok(new
-            {
-                game.Id,
-                game.Weeknumber,
-                WinningNumbers = game.Winningnumbers,
-                TotalBoards = game.Boards.Count,
-                TotalWinners = winningBoards.Count,
-                WinningBoards = winningBoards.Select(b => new
-                {
-                    b.Id,
-                    b.Userid,
-                    UserName = b.User.Firstname + " " + b.User.Lastname,
-                    b.Selectednumbers
-                }).ToList(),
-                Message = $"Winning numbers drawn! {winningBoards.Count} winner(s) found."
-            });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error drawing winning numbers");
-            return StatusCode(500, "An error occurred while drawing winning numbers");
         }
     }
 

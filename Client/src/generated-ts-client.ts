@@ -307,7 +307,7 @@ export class BalanceClient {
         return Promise.resolve<any[]>(null as any);
     }
 
-    getUserBalance(userId: string): Promise<FileResponse> {
+    getUserBalance(userId: string): Promise<UserBalanceResponseDTO> {
         let url_ = this.baseUrl + "/api/Balance/user/{userId}";
         if (userId === undefined || userId === null)
             throw new globalThis.Error("The parameter 'userId' must be defined.");
@@ -317,7 +317,7 @@ export class BalanceClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -326,26 +326,21 @@ export class BalanceClient {
         });
     }
 
-    protected processGetUserBalance(response: Response): Promise<FileResponse> {
+    protected processGetUserBalance(response: Response): Promise<UserBalanceResponseDTO> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserBalanceResponseDTO;
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse>(null as any);
+        return Promise.resolve<UserBalanceResponseDTO>(null as any);
     }
 }
 
@@ -416,6 +411,42 @@ export class BoardClient {
     }
 
     protected processGetBoardsByUser(response: Response): Promise<BoardResponseDTO[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BoardResponseDTO[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardResponseDTO[]>(null as any);
+    }
+
+    getActiveBoardsByUser(userId: string): Promise<BoardResponseDTO[]> {
+        let url_ = this.baseUrl + "/api/Board/userActive/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetActiveBoardsByUser(_response);
+        });
+    }
+
+    protected processGetActiveBoardsByUser(response: Response): Promise<BoardResponseDTO[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -583,6 +614,50 @@ export class BoardClient {
         }
         return Promise.resolve<FileResponse>(null as any);
     }
+
+    toggleRepeatForBoard(repeat: boolean | undefined, boardIdPath: string, boardIdBody: string): Promise<Board> {
+        let url_ = this.baseUrl + "/api/Board/toggleRepeat/{boardId}?";
+        if (boardIdPath === undefined || boardIdPath === null)
+            throw new globalThis.Error("The parameter 'boardIdPath' must be defined.");
+        url_ = url_.replace("{boardId}", encodeURIComponent("" + boardIdPath));
+        if (repeat === null)
+            throw new globalThis.Error("The parameter 'repeat' cannot be null.");
+        else if (repeat !== undefined)
+            url_ += "repeat=" + encodeURIComponent("" + repeat) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(boardIdBody);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processToggleRepeatForBoard(_response);
+        });
+    }
+
+    protected processToggleRepeatForBoard(response: Response): Promise<Board> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as Board;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Board>(null as any);
+    }
 }
 
 export class GameClient {
@@ -595,13 +670,17 @@ export class GameClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    createGame(): Promise<FileResponse> {
+    createGame(dto: DrawWinningNumbersDTO): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/Game/create";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(dto);
+
         let options_: RequestInit = {
+            body: content_,
             method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/octet-stream"
             }
         };
@@ -688,48 +767,6 @@ export class GameClient {
     }
 
     protected processGetCurrentGameDetails(response: Response): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FileResponse>(null as any);
-    }
-
-    drawWinningNumbers(dto: DrawWinningNumbersDTO): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/api/Game/draw";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(dto);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processDrawWinningNumbers(_response);
-        });
-    }
-
-    protected processDrawWinningNumbers(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -1311,6 +1348,7 @@ export interface Board {
     timestamp?: string;
     winner?: boolean;
     gameid?: string | undefined;
+    repeat?: boolean;
     game?: Game | undefined;
     user?: User;
 }
@@ -1343,6 +1381,18 @@ export interface ApproveTransactionDTO {
     transactionId?: number;
 }
 
+export interface UserBalanceResponseDTO {
+    userId?: string;
+    userName?: string;
+    currentBalance?: number;
+    totalDeposits?: number;
+    pendingDeposits?: number;
+    transactionCount?: number;
+    approvedCount?: number;
+    pendingCount?: number;
+    recentTransactions?: BalanceTransactionResponseDTO[];
+}
+
 export interface BoardResponseDTO {
     id?: string;
     userId?: string;
@@ -1350,12 +1400,13 @@ export interface BoardResponseDTO {
     timestamp?: string;
     winner?: boolean;
     price?: number;
+    repeat?: boolean;
 }
 
 export interface CreateBoardDTO {
     userId?: string;
     selectedNumbers?: number[];
-    repeatForWeeks?: number | undefined;
+    repeat?: boolean;
 }
 
 export interface ValidateBoardDTO {
