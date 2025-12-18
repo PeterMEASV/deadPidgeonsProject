@@ -25,3 +25,15 @@ public record ApproveTransactionDTO(
     [Required]
     int TransactionId
 );
+
+public record UserBalanceResponseDTO(
+    string UserId,
+    string UserName,
+    decimal CurrentBalance,
+    decimal TotalDeposits,
+    decimal PendingDeposits,
+    int TransactionCount,
+    int ApprovedCount,
+    int PendingCount,
+    List<BalanceTransactionResponseDTO> RecentTransactions
+);

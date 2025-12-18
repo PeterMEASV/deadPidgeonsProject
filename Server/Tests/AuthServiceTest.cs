@@ -28,7 +28,7 @@ public class AuthServiceTest(IAuthService authService, MyDbContext context, ITes
         await context.SaveChangesAsync();
 
         var result = await authService.LoginAsync(new LoginDTO(user.Email, password));
-        
+        outputHelper.WriteLine(result?.ToString());
         Assert.NotNull(result);
         Assert.Equal(user.Id, result.Id);
     }
@@ -51,7 +51,45 @@ public class AuthServiceTest(IAuthService authService, MyDbContext context, ITes
         await context.SaveChangesAsync();
         
         await Assert.ThrowsAsync<InvalidCredentialException>(() => authService.LoginAsync(new LoginDTO("private@test.com", "password")));
-
     }
 
+    [Fact]
+    public async Task Login_InvalidPassword()
+    {
+        var password = "EASV2025";
+        var user = new User
+        {
+            Id = Guid.NewGuid().ToString(),
+            Email = "easv@test.com",
+            Phonenumber = "12345678",
+            Password = hasher.HashPassword(null, password),
+            Firstname = "EASV",
+            Lastname = "Test",
+            Isactive = true
+        };
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        
+        await Assert.ThrowsAsync<InvalidCredentialException>(() => authService.LoginAsync(new LoginDTO(user.Email, "wrongpassword")));
+    }
+
+    [Fact]
+    public async Task Login_InactiveUser()
+    {
+            var password = "EASV2025";
+            var user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "easv@test.com",
+                Phonenumber = "12345678",
+                Password = hasher.HashPassword(null, password),
+                Firstname = "EASV",
+                Lastname = "Test",
+                Isactive = false
+            };
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+            
+            await Assert.ThrowsAsync<AuthenticationException>(() => authService.LoginAsync(new LoginDTO(user.Email, password)));
+    }
 }

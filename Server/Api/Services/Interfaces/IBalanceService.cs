@@ -11,5 +11,5 @@ public interface IBalanceService
     Task<List<Balancelog>> GetApprovedTransactionsAsync();
     Task<List<Balancelog>> GetAllTransactionsAsync();
     Task<List<Balancelog>> GetUserTransactionsAsync(string userId);
-    Task<object> GetUserBalanceAsync(string userId);
+    Task<UserBalanceResponseDTO> GetUserBalanceAsync(string userId);
 }

@@ -124,7 +124,7 @@ public class BalanceService(MyDbContext context, ILogger<BalanceService> logger,
             .ToListAsync();
     }
 
-    public async Task<object> GetUserBalanceAsync(string userId)
+    public async Task<UserBalanceResponseDTO> GetUserBalanceAsync(string userId)
     {
         logger.LogInformation("Getting balance for user {UserId}", userId);
 
@@ -137,29 +137,29 @@ public class BalanceService(MyDbContext context, ILogger<BalanceService> logger,
             throw new KeyNotFoundException("User not found");
         }
 
-        return new
-        {
-            UserId = user.Id,
-            UserName = user.Firstname + " " + user.Lastname,
-            CurrentBalance = user.Balance,
-            TotalDeposits = user.Balancelogs.Where(bl => bl.Approved).Sum(bl => bl.Amount),
-            PendingDeposits = user.Balancelogs.Where(bl => !bl.Approved).Sum(bl => bl.Amount),
-            TransactionCount = user.Balancelogs.Count,
-            ApprovedCount = user.Balancelogs.Count(bl => bl.Approved),
-            PendingCount = user.Balancelogs.Count(bl => !bl.Approved),
-            RecentTransactions = user.Balancelogs
+        //wtf was that. Ændret til at rent faktisk bruge vores DTO'er.
+        return new UserBalanceResponseDTO(
+            user.Id,
+            user.Firstname + " " + user.Lastname,
+            user.Balance,
+            user.Balancelogs.Where(bl => bl.Approved).Sum(bl => bl.Amount),
+            user.Balancelogs.Where(bl => !bl.Approved).Sum(bl => bl.Amount),
+            user.Balancelogs.Count,
+            user.Balancelogs.Count(bl => bl.Approved),
+            user.Balancelogs.Count(bl => !bl.Approved),
+            user.Balancelogs
                 .OrderByDescending(bl => bl.Timestamp)
                 .Take(10)
-                .Select(bl => new
-                {
+                .Select(bl => new BalanceTransactionResponseDTO(
                     bl.Id,
+                    bl.Userid,
                     bl.Amount,
                     bl.Transactionnumber,
-                    bl.Timestamp,
-                    bl.Approved,
-                    Status = bl.Approved ? "Approved" : "Pending"
-                })
+                    bl.Timestamp
+                ))
                 .ToList()
-        };
+        );
     }
 }
+
+

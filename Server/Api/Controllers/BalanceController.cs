@@ -196,7 +196,7 @@ public class BalanceController : ControllerBase
     }
     
     [HttpGet("user/{userId}")]
-    public async Task<ActionResult<object>> GetUserBalance(string userId)
+    public async Task<ActionResult<UserBalanceResponseDTO>> GetUserBalance(string userId)
     {
         try
         {
