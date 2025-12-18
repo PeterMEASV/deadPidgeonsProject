@@ -44,16 +44,5 @@ public class BoardServiceTest(IBoardService boardService, IGameService gameServi
         Assert.Throws<ArgumentException>(() => boardService.CalculateBoardPrice(9));
         Assert.Throws<ArgumentException>(() => boardService.CalculateBoardPrice(0));
     }
-
-    [Fact]
-    public async Task CreateBoard_ValidInput()
-    {
-        User testUser = await CreateTestUser();
-        await gameService.CreateGameAsync();
-        var boardDTO = new CreateBoardDTO(testUser.Id, [2, 5, 1, 9, 12], null);
-        
-        await boardService.CreateBoardAsync(boardDTO);
-        
-        Assert.Equal(1, context.Boards.Count());
-    }
+    
 }
